@@ -3,14 +3,25 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-  "build": "tsc",
-  "watch": "tsc --watch"
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "@eslint/js": "^9.25.1",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.0"
   }
 }
