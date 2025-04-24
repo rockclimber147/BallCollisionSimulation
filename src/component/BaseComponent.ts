@@ -80,12 +80,17 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
     this.model = model;
     this.ui = ui;
     this.targetId = targetId;
+
+    this.model.addObserver(this.ui);
   }
 
   setup(): void {
     this.ui.setup();
     this.ui.inject(this.targetId);
+    this.setupUIEvents();
   }
+
+  abstract setupUIEvents(): void;
 
   destroy(): void {
     this.model.removeObserver(this.ui);

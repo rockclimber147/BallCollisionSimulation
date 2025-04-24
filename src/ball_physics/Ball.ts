@@ -137,4 +137,14 @@ export class MovingBall extends Ball {
     this.y += this.vy * deltatime;
     this.handleWallCollision(deltatime);
   }
+
+  static createRandomBall(): MovingBall {
+    const radius = Math.min(20, Math.random() * 40 + 10);
+    const x = MovingBall.xBounds * 0.5 + (Math.random() - 0.5) * MovingBall.xBounds * 0.5;
+    const y = MovingBall.yBounds * 0.5 + (Math.random() - 0.5) * MovingBall.yBounds * 0.5;
+    const vx = (Math.random() - 0.5) * 200;
+    const vy = (Math.random() - 0.5) * 200;
+    const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+    return new MovingBall(new Vector(x, y), radius, color, new Vector(vx, vy));
+  }
 }
