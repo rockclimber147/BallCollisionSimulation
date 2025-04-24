@@ -77,15 +77,17 @@ abstract class ComponentBase<
 > {
   readonly model: M;
   readonly ui: U;
+  readonly targetId: string;
 
-  constructor(model: M, ui: U) {
+  constructor(model: M, ui: U, targetId: string) {
     this.model = model;
     this.ui = ui;
+    this.targetId = targetId;
   }
 
-  setup(targetId: string): void {
+  setup(): void {
     this.ui.setup();
-    this.ui.inject(targetId)
+    this.ui.inject(this.targetId)
   }
 
   destroy(): void {
