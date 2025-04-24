@@ -67,7 +67,7 @@ class Ball implements Drawable {
   }
 }
 
-class MovingBall extends Ball {
+export class MovingBall extends Ball {
   static xBounds: number = 800;
   static yBounds: number = 600;
 
@@ -138,5 +138,3 @@ class MovingBall extends Ball {
     this.handleWallCollision(deltatime);
   }
 }
-
-export { MovingBall };

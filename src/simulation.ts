@@ -45,11 +45,16 @@ export class SimulationUI extends ComponentUIBase<SimulationModel> {
     throw new Error('Method not implemented.');
   }
 
-  draw() {
-    for (const drawable of this.model.getDrawables()) {
+  draw(drawables: Drawable[]) {
+    for (const drawable of drawables) {
       drawable.draw(this.context);
     }
   }
 }
 
-export class SimulationComponent extends ComponentBase<SimulationModel, SimulationUI> {}
+export class SimulationComponent extends ComponentBase<SimulationModel, SimulationUI> {
+    constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
+        super(model, ui, targetId)
+        this.ui.addAction("ballAdded", () => {this.ui.draw(this.model.getDrawables())})
+    }
+}
