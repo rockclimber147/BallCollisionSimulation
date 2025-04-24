@@ -1,4 +1,4 @@
-import { ComponentUIBase, ComponentModelBase, ComponentBase } from './component/component.js';
+import { ComponentUIBase, ComponentModelBase, ComponentBase } from './component/BaseComponent.js';
 import { MovingBall } from './ball_physics/Ball.js';
 import { Drawable } from './display/Drawable.js';
 

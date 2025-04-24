@@ -1,4 +1,4 @@
-import { SimulationComponent, SimulationModel, SimulationUI } from './simulation.js';
+import { SimulationComponent, SimulationModel, SimulationUI } from './SimulationComponent.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const model = new SimulationModel();
