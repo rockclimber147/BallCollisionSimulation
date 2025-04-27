@@ -23,6 +23,10 @@ export class SimulationModel extends ComponentModelBase {
     this.balls.push(ball);
     this.notify(SimulationActionEnum.BALL_ADDED);
   }
+
+  addBalls(balls: MovingBall[]) {
+    this.balls = this.balls.concat(balls)
+  }
 }
 
 export class SimulationUI extends ComponentUIBase {
@@ -65,8 +69,12 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       new AddBallUI(),
       'AddBallComponent'
     );
+    this.addBallsComponent.addObserver(this);
 
-    this.addAction(SimulationActionEnum.BALL_ADDED, () => {});
+    this.addAction(SimulationActionEnum.BALL_ADDED, () => {
+      this.model.addBalls(this.addBallsComponent.getBalls())
+      this.ui.drawAll(this.model.getBalls())
+    });
   }
 
   setupUIEvents(): void {
