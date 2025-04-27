@@ -1,5 +1,6 @@
 import { MovingBall } from '../../../ball_physics/Ball.js';
-import { TerminalComponentBase, ComponentModelBase, ComponentUIBase } from '../../BaseComponent.js';
+import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../../BaseComponent.js';
+import { NumericSliderComponent } from '../../NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../SimulationComponent.js';
 
 export class AddBallModel extends ComponentModelBase {
@@ -80,13 +81,7 @@ export class AddBallModel extends ComponentModelBase {
 
 export class AddBallUI extends ComponentUIBase {
   private _modeSelect?: HTMLSelectElement;
-  private _amountInput?: HTMLInputElement;
-  private _amountDisplay?: HTMLSpanElement;
   private _specificFieldsDiv?: HTMLDivElement;
-  private _radiusInput?: HTMLInputElement;
-  private _radiusDisplay?: HTMLSpanElement;
-  private _massInput?: HTMLInputElement;
-  private _massDisplay?: HTMLSpanElement;
   private _colorInput?: HTMLInputElement;
   private _addButton?: HTMLButtonElement;
 
@@ -98,13 +93,7 @@ export class AddBallUI extends ComponentUIBase {
     this.container = await this.loadTemplate(import.meta.url);
 
     this._modeSelect = this.container.querySelector('#mode')!;
-    this._amountInput = this.container.querySelector('#amount')!;
-    this._amountDisplay = this.container.querySelector('#amountDisplay')!;
     this._specificFieldsDiv = this.container.querySelector('#specificFields')!;
-    this._radiusInput = this.container.querySelector('#radius')!;
-    this._radiusDisplay = this.container.querySelector('#radiusDisplay')!;
-    this._massInput = this.container.querySelector('#mass')!;
-    this._massDisplay = this.container.querySelector('#massDisplay')!;
     this._colorInput = this.container.querySelector('#color')!;
     this._addButton = this.container.querySelector('#add')!;
   }
@@ -125,32 +114,8 @@ export class AddBallUI extends ComponentUIBase {
     return this._modeSelect;
   }
 
-  get amountInput(): HTMLInputElement | undefined {
-    return this._amountInput;
-  }
-
-  get amountDisplay(): HTMLSpanElement | undefined {
-    return this._amountDisplay;
-  }
-
   get specificFieldsDiv(): HTMLDivElement | undefined {
     return this._specificFieldsDiv;
-  }
-
-  get radiusInput(): HTMLInputElement | undefined {
-    return this._radiusInput;
-  }
-
-  get radiusDisplay(): HTMLSpanElement | undefined {
-    return this._radiusDisplay;
-  }
-
-  get massInput(): HTMLInputElement | undefined {
-    return this._massInput;
-  }
-
-  get massDisplay(): HTMLSpanElement | undefined {
-    return this._massDisplay;
   }
 
   get colorInput(): HTMLInputElement | undefined {
@@ -162,9 +127,18 @@ export class AddBallUI extends ComponentUIBase {
   }
 }
 
-export class AddBallComponent extends TerminalComponentBase<AddBallModel, AddBallUI> {
+export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallUI> {
+  amountSlider: NumericSliderComponent;
+  radiusSlider: NumericSliderComponent;
+  massSlider: NumericSliderComponent;
   constructor(model: AddBallModel, ui: AddBallUI, targetId: string) {
     super(model, ui, targetId);
+    this.radiusSlider = new NumericSliderComponent('radius', 'Radius');
+    this.radiusSlider.addObserver(this);
+    this.massSlider = new NumericSliderComponent('mass', 'Mass');
+    this.massSlider.addObserver(this);
+    this.amountSlider = new NumericSliderComponent('amount', 'Choose Amount');
+    this.amountSlider.addObserver(this);
   }
 
   setupUIEvents(): void {
@@ -176,10 +150,37 @@ export class AddBallComponent extends TerminalComponentBase<AddBallModel, AddBal
       const selectedMode = (event.target as HTMLSelectElement).value as
         | BallModeEnum.RANDOM
         | BallModeEnum.SPECIFIC;
-      console.log(selectedMode)
       this.model.mode = selectedMode;
       this.ui.toggleSpecificFields(this.model.mode);
     });
+
+    this.ui.colorInput?.addEventListener('change', (event) => {
+      const target = event.target as HTMLInputElement;
+      const value = target.value;
+      this.model.color = value;
+    });
+  }
+
+  async setupChildren(): Promise<void> {
+    await this.radiusSlider.setup();
+    await this.massSlider.setup();
+    await this.amountSlider.setup();
+
+    this.addAction(this.radiusSlider.getID(), () => {
+      this.model.radius = this.radiusSlider.getValue();
+    });
+
+    this.addAction(this.massSlider.getID(), () => {
+      this.model.mass = this.massSlider.getValue();
+    });
+
+    this.addAction(this.amountSlider.getID(), () => {
+      this.model.toAddCount = this.amountSlider.getValue();
+    });
+  }
+
+  tearDownChildren(): void {
+    throw new Error('Method not implemented.');
   }
 
   getBalls(): MovingBall[] {
