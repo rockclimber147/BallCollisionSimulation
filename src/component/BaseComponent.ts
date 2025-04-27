@@ -52,10 +52,7 @@ interface ComponentUI {
   inject(targetId: string): void;
 }
 
-abstract class ComponentUIBase
-  extends ObserverBase
-  implements ComponentUI
-{
+abstract class ComponentUIBase extends ObserverBase implements ComponentUI {
   protected container?: HTMLElement;
 
   abstract setup(): Promise<void>;
@@ -67,11 +64,11 @@ abstract class ComponentUIBase
 
   protected async loadTemplate(url: string): Promise<HTMLElement> {
     const pathParts = url.split('/');
-    const lastIndex = pathParts.length - 1
-    pathParts[3] = "src"
+    const lastIndex = pathParts.length - 1;
+    pathParts[3] = 'src';
     const templateId = pathParts[lastIndex].replace('.js', '');
-    pathParts[lastIndex] = templateId + ".html"
-    const htmlUrl = pathParts.join("/")
+    pathParts[lastIndex] = templateId + '.html';
+    const htmlUrl = pathParts.join('/');
 
     const response = await fetch(htmlUrl);
     const text = await response.text();
@@ -125,7 +122,7 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
     this.subject.notify(notificationType);
   }
 
-  abstract setup(): Promise<void>
+  abstract setup(): Promise<void>;
 
   abstract setupUIEvents(): void;
 
@@ -140,16 +137,18 @@ interface ParentComponent {
   tearDownChildren(): void;
 }
 
-abstract class ParentComponentBase<M extends ComponentModelBase, U extends ComponentUIBase> extends ComponentBase<M, U> implements ParentComponent {
-  
-  abstract setupChildren(): Promise<void>
-  
-  abstract tearDownChildren(): void
-  
+abstract class ParentComponentBase<M extends ComponentModelBase, U extends ComponentUIBase>
+  extends ComponentBase<M, U>
+  implements ParentComponent
+{
+  abstract setupChildren(): Promise<void>;
+
+  abstract tearDownChildren(): void;
+
   async setup(): Promise<void> {
     await this.ui.setup();
     this.ui.inject(this.targetId);
-    await this.setupChildren()
+    await this.setupChildren();
     this.setupUIEvents();
   }
 
@@ -160,7 +159,10 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
   }
 }
 
-abstract class TerminalComponentBase<M extends ComponentModelBase, U extends ComponentUIBase> extends ComponentBase<M, U> {
+abstract class TerminalComponentBase<
+  M extends ComponentModelBase,
+  U extends ComponentUIBase,
+> extends ComponentBase<M, U> {
   async setup(): Promise<void> {
     await this.ui.setup();
     this.ui.inject(this.targetId);
@@ -173,4 +175,10 @@ abstract class TerminalComponentBase<M extends ComponentModelBase, U extends Com
   }
 }
 
-export { ComponentUIBase, ComponentModelBase, ComponentBase, TerminalComponentBase, ParentComponentBase };
+export {
+  ComponentUIBase,
+  ComponentModelBase,
+  ComponentBase,
+  TerminalComponentBase,
+  ParentComponentBase,
+};
