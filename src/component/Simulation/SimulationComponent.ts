@@ -1,6 +1,7 @@
-import { ComponentUIBase, ComponentModelBase, ComponentBase } from '../BaseComponent.js';
+import { ComponentUIBase, ComponentModelBase, ParentComponentBase } from '../BaseComponent.js';
 import { MovingBall } from '../../ball_physics/Ball.js';
 import { Drawable } from '../../display/Drawable.js';
+import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
 
 export class SimulationModel extends ComponentModelBase {
   private balls: MovingBall[] = [];
@@ -24,20 +25,19 @@ export class SimulationModel extends ComponentModelBase {
   }
 }
 
-export class SimulationUI extends ComponentUIBase<SimulationModel> {
+export class SimulationUI extends ComponentUIBase {
   canvas?: HTMLCanvasElement;
   context?: CanvasRenderingContext2D;
   addBallButton?: HTMLButtonElement;
 
-  constructor(model: SimulationModel) {
-    super(model);
+  constructor() {
+    super();
   }
 
   async setup() {
     this.container = await this.loadTemplate(import.meta.url);
     this.canvas = this.container.querySelector('canvas')!;
     this.context = this.canvas.getContext('2d')!;
-    this.addBallButton = this.container.querySelector('#addBallButton')!;
   }
 
   tearDown(): void {
@@ -55,15 +55,18 @@ export class SimulationUI extends ComponentUIBase<SimulationModel> {
   }
 }
 
-export class SimulationComponent extends ComponentBase<SimulationModel, SimulationUI> {
+export class SimulationComponent extends ParentComponentBase<SimulationModel, SimulationUI> {
+  addBallsComponent: AddBallComponent;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
 
-    this.addAction(SimulationActionEnum.BALL_ADDED, () => {
-      const allBalls = this.model.getBalls();
-      const finalBall = allBalls[allBalls.length - 1];
-      this.ui.draw(finalBall);
-    });
+    this.addBallsComponent = new AddBallComponent(
+      new AddBallModel(),
+      new AddBallUI(),
+      'AddBallComponent'
+    );
+
+    this.addAction(SimulationActionEnum.BALL_ADDED, () => {});
   }
 
   setupUIEvents(): void {
@@ -71,8 +74,16 @@ export class SimulationComponent extends ComponentBase<SimulationModel, Simulati
       this.model.addRandomBall();
     });
   }
+
+  async setupChildren(): Promise<void> {
+    await this.addBallsComponent.setup();
+  }
+
+  tearDownChildren(): void {
+    this.addBallsComponent.tearDown();
+  }
 }
 
-enum SimulationActionEnum {
+export enum SimulationActionEnum {
   BALL_ADDED = 'ballAdded',
 }
