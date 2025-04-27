@@ -60,12 +60,31 @@ abstract class ComponentUIBase<T extends ComponentModelBase>
   model: T;
   protected container?: HTMLElement;
 
-  abstract setup(): void;
+  abstract setup(): Promise<void>;
   abstract tearDown(): void;
 
   constructor(model: T) {
     super();
     this.model = model;
+  }
+
+  protected async loadTemplate(url: string): Promise<HTMLElement> {
+    const pathParts = url.split('/');
+    const lastIndex = pathParts.length - 1
+    pathParts[3] = "src"
+    const templateId = pathParts[lastIndex].replace('.js', '');
+    pathParts[lastIndex] = templateId + ".html"
+    const htmlUrl = pathParts.join("/")
+
+    const response = await fetch(htmlUrl);
+    const text = await response.text();
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = text;
+
+    const template = tempDiv.querySelector(`template#${templateId}`) as HTMLTemplateElement;
+    if (!template) throw new Error(`Template with ID '${templateId}' not found in ${url}`);
+
+    return template.content.cloneNode(true) as HTMLElement;
   }
 
   inject(targetId: string): void {
@@ -77,9 +96,7 @@ abstract class ComponentUIBase<T extends ComponentModelBase>
   }
 }
 
-abstract class ComponentModelBase extends SubjectBase {
-
-}
+abstract class ComponentModelBase extends SubjectBase {}
 
 abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUIBase<M>>
   extends ObserverBase
@@ -88,7 +105,7 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
   protected readonly model: M;
   protected readonly ui: U;
   protected readonly targetId: string;
-  private readonly subject = new SubjectBase()
+  private readonly subject = new SubjectBase();
 
   constructor(model: M, ui: U, targetId: string) {
     super();
@@ -96,7 +113,7 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
     this.ui = ui;
     this.targetId = targetId;
 
-    this.model.addObserver(this.ui);
+    this.model.addObserver(this);
   }
 
   addObserver(observer: Observer): void {
@@ -111,8 +128,8 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
     this.subject.notify(notificationType);
   }
 
-  setup(): void {
-    this.ui.setup();
+  async setup() {
+    await this.ui.setup();
     this.ui.inject(this.targetId);
     this.setupUIEvents();
   }
