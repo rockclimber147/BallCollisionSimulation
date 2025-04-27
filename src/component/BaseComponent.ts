@@ -46,26 +46,23 @@ class SubjectBase implements Subject {
   }
 }
 
-interface ComponentUI<T extends ComponentModelBase> {
-  model: T;
+interface ComponentUI {
   setup(): void;
   tearDown(): void;
   inject(targetId: string): void;
 }
 
-abstract class ComponentUIBase<T extends ComponentModelBase>
+abstract class ComponentUIBase
   extends ObserverBase
-  implements ComponentUI<T>
+  implements ComponentUI
 {
-  model: T;
   protected container?: HTMLElement;
 
   abstract setup(): Promise<void>;
   abstract tearDown(): void;
 
-  constructor(model: T) {
+  constructor() {
     super();
-    this.model = model;
   }
 
   protected async loadTemplate(url: string): Promise<HTMLElement> {
@@ -98,7 +95,7 @@ abstract class ComponentUIBase<T extends ComponentModelBase>
 
 abstract class ComponentModelBase extends SubjectBase {}
 
-abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUIBase<M>>
+abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUIBase>
   extends ObserverBase
   implements Subject
 {
@@ -128,18 +125,52 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
     this.subject.notify(notificationType);
   }
 
-  async setup() {
-    await this.ui.setup();
-    this.ui.inject(this.targetId);
-    this.setupUIEvents();
-  }
+  abstract setup(): Promise<void>
 
   abstract setupUIEvents(): void;
 
-  destroy(): void {
+  tearDown(): void {
     this.model.removeObserver(this.ui);
     this.ui.tearDown();
   }
 }
 
-export { ComponentUIBase, ComponentModelBase, ComponentBase };
+interface ParentComponent {
+  setupChildren(): Promise<void>;
+  tearDownChildren(): void;
+}
+
+abstract class ParentComponentBase<M extends ComponentModelBase, U extends ComponentUIBase> extends ComponentBase<M, U> implements ParentComponent {
+  
+  abstract setupChildren(): Promise<void>
+  
+  abstract tearDownChildren(): void
+  
+  async setup(): Promise<void> {
+    await this.ui.setup();
+    this.ui.inject(this.targetId);
+    await this.setupChildren()
+    this.setupUIEvents();
+  }
+
+  tearDown(): void {
+    this.tearDownChildren();
+    this.model.removeObserver(this.ui);
+    this.ui.tearDown();
+  }
+}
+
+abstract class TerminalComponentBase<M extends ComponentModelBase, U extends ComponentUIBase> extends ComponentBase<M, U> {
+  async setup(): Promise<void> {
+    await this.ui.setup();
+    this.ui.inject(this.targetId);
+    this.setupUIEvents();
+  }
+
+  tearDown(): void {
+    this.model.removeObserver(this.ui);
+    this.ui.tearDown();
+  }
+}
+
+export { ComponentUIBase, ComponentModelBase, ComponentBase, TerminalComponentBase, ParentComponentBase };
