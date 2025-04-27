@@ -6,12 +6,7 @@ interface Observer {
 abstract class ObserverBase implements Observer {
   private actions: Map<string, () => void> = new Map();
   updateWithType(notificationType: string): void {
-    const action = this.actions.get(notificationType);
-    if (!action) {
-      console.log(`no associated action for ${notificationType}`);
-      return;
-    }
-    action();
+    this.actions.get(notificationType)?.();
   }
 
   update() {

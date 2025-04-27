@@ -1,8 +1,36 @@
 <template id="AddBallComponent">
   <div>
-    <button id="add">Add</button>
-    <label for="amount">Choose a value:</label>
-    <input type="range" id="amount" min="1" max="100" step="1" value="1" />
-    <span> <span id="amountDisplay">1</span></span>
+
+    <div>
+      <label for="mode">Select Mode:</label>
+      <select id="mode">
+        <option value="random">Random</option>
+        <option value="specific">Specific</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="amount">Choose amount:</label>
+      <input type="range" id="amount" min="1" max="100" step="1" value="1" />
+      <span> <span id="amountDisplay">1</span></span>
+    </div>
+
+    <div id="specificFields">
+      <div>
+        <label for="radius">Radius:</label>
+        <input type="range" id="radius" min="1" max="200" step="1" value="10" />
+        <span> <span id="radiusDisplay">10</span></span>
+      </div>
+      <div>
+        <label for="mass">Mass:</label>
+        <input type="range" id="mass" min="1" max="1000" step="1" value="50" />
+        <span> <span id="massDisplay">50</span></span>
+      </div>
+      <div>
+        <label for="color">Color:</label>
+        <input type="color" id="color" value="#ff0000" />
+      </div>
+    </div>
   </div>
+  <button id="add">Add</button>
 </template>
