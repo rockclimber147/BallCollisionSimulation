@@ -133,11 +133,11 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
   massSlider: NumericSliderComponent;
   constructor(model: AddBallModel, ui: AddBallUI, targetId: string) {
     super(model, ui, targetId);
-    this.radiusSlider = new NumericSliderComponent('radius', 'Radius');
+    this.radiusSlider = new NumericSliderComponent('radius', 'Radius', { value: this.model.radius});
     this.radiusSlider.addObserver(this);
-    this.massSlider = new NumericSliderComponent('mass', 'Mass');
+    this.massSlider = new NumericSliderComponent('mass', 'Mass', {value: this.model.mass});
     this.massSlider.addObserver(this);
-    this.amountSlider = new NumericSliderComponent('amount', 'Choose Amount');
+    this.amountSlider = new NumericSliderComponent('amount', 'Choose Amount', {value: this.model.toAddCount});
     this.amountSlider.addObserver(this);
   }
 

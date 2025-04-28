@@ -41,26 +41,22 @@ class NumericSliderModel extends ComponentModelBase {
   min: number;
   max: number;
   step: number;
-  constructor(value: number, min: number, max: number, step: number) {
+  constructor(options: NumericSliderOptions = {}) {
     super();
-    this.value = value;
-    this.min = min;
-    this.max = max;
-    this.step = step;
+    this.value = options.value ?? 1;
+    this.min = options.min ?? 1;
+    this.max = options.max ?? 100;
+    this.step = options.step ?? 1;
   }
 }
 
-export class NumericSliderComponent extends TerminalComponentBase<NumericSliderModel, NumericSliderUI> {
+export class NumericSliderComponent extends TerminalComponentBase<
+  NumericSliderModel,
+  NumericSliderUI
+> {
   private id: string;
-  constructor(
-    targetId: string,
-    id: string,
-    initialValue: number = 1,
-    min: number = 1,
-    max: number = 100,
-    step: number = 1
-  ) {
-    const model = new NumericSliderModel(initialValue, min, max, step);
+  constructor(targetId: string, id: string, options: NumericSliderOptions = {}) {
+    const model = new NumericSliderModel(options);
     super(model, new NumericSliderUI(model, id), targetId);
     this.id = id;
   }
@@ -83,3 +79,10 @@ export class NumericSliderComponent extends TerminalComponentBase<NumericSliderM
     return this.id;
   }
 }
+
+type NumericSliderOptions = {
+  value?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+};
