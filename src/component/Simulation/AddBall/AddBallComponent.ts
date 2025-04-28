@@ -1,4 +1,4 @@
-import { MovingBall } from '../../../ball_physics/Ball.js';
+import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../../BaseComponent.js';
 import { NumericSliderComponent } from '../../NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../SimulationComponent.js';
@@ -14,19 +14,20 @@ export class AddBallModel extends ComponentModelBase {
     super();
   }
 
-  getBalls(): MovingBall[] {
-    const balls: MovingBall[] = [];
+  getBalls(): PhysicsBall[] {
+    const balls: PhysicsBall[] = [];
     for (let i = 1; i <= this.toAddCount; i++) {
       balls.push(this.createBall());
     }
     return balls;
   }
 
-  private createBall(): MovingBall {
-    const ball = MovingBall.createRandomBall();
+  private createBall(): PhysicsBall {
+    const ball = PhysicsBall.createRandomBall();
     if (this._mode == BallModeEnum.RANDOM) return ball;
     ball.color = this._color;
     ball.radius = this._radius;
+    ball.mass = this._mass;
     return ball;
   }
 
@@ -133,11 +134,15 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
   massSlider: NumericSliderComponent;
   constructor(model: AddBallModel, ui: AddBallUI, targetId: string) {
     super(model, ui, targetId);
-    this.radiusSlider = new NumericSliderComponent('radius', 'Radius', { value: this.model.radius});
+    this.radiusSlider = new NumericSliderComponent('radius', 'Radius', {
+      value: this.model.radius,
+    });
     this.radiusSlider.addObserver(this);
-    this.massSlider = new NumericSliderComponent('mass', 'Mass', {value: this.model.mass});
+    this.massSlider = new NumericSliderComponent('mass', 'Mass', { value: this.model.mass });
     this.massSlider.addObserver(this);
-    this.amountSlider = new NumericSliderComponent('amount', 'Choose Amount', {value: this.model.toAddCount});
+    this.amountSlider = new NumericSliderComponent('amount', 'Choose Amount', {
+      value: this.model.toAddCount,
+    });
     this.amountSlider.addObserver(this);
   }
 
@@ -183,7 +188,7 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
     throw new Error('Method not implemented.');
   }
 
-  getBalls(): MovingBall[] {
+  getBalls(): PhysicsBall[] {
     return this.model.getBalls();
   }
 }

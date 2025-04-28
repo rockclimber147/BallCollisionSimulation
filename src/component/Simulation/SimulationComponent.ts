@@ -1,10 +1,10 @@
 import { ComponentUIBase, ComponentModelBase, ParentComponentBase } from '../BaseComponent.js';
-import { MovingBall } from '../../ball_physics/Ball.js';
+import { PhysicsBall } from '../../ball_physics/Ball.js';
 import { Drawable } from '../../display/Drawable.js';
 import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
 
 export class SimulationModel extends ComponentModelBase {
-  private balls: MovingBall[] = [];
+  private balls: PhysicsBall[] = [];
   fps: number = 60;
   get BallCount(): number {
     return this.balls.length;
@@ -18,13 +18,7 @@ export class SimulationModel extends ComponentModelBase {
     return this.balls;
   }
 
-  addRandomBall() {
-    const ball = MovingBall.createRandomBall();
-    this.balls.push(ball);
-    this.notify(SimulationActionEnum.BALL_ADDED);
-  }
-
-  addBalls(balls: MovingBall[]) {
+  addBalls(balls: PhysicsBall[]) {
     this.balls = this.balls.concat(balls)
   }
 }
@@ -32,7 +26,6 @@ export class SimulationModel extends ComponentModelBase {
 export class SimulationUI extends ComponentUIBase {
   canvas?: HTMLCanvasElement;
   context?: CanvasRenderingContext2D;
-  addBallButton?: HTMLButtonElement;
 
   constructor() {
     super();
@@ -78,9 +71,6 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   }
 
   setupUIEvents(): void {
-    this.ui.addBallButton?.addEventListener('click', () => {
-      this.model.addRandomBall();
-    });
   }
 
   async setupChildren(): Promise<void> {
