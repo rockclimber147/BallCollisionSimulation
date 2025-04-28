@@ -6,12 +6,46 @@ import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComp
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   fps: number = 60;
-  get BallCount(): number {
-    return this.balls.length;
-  }
+  updateInterval?: number;
+  updateTime: string = '0';
+  physicsSteps: number = 1;
 
   constructor() {
     super();
+  }
+
+  startUpdateLoop() {
+    const interval = 1000 / this.fps;
+    this.updateInterval = window.setInterval(() => {
+      const startTime = performance.now();
+
+      this.tick();
+
+      const endTime = performance.now();
+      const timeTaken = endTime - startTime;
+      this.updateTime = timeTaken.toFixed(2);
+    }, interval);
+  }
+
+  stopUpdateLoop() {
+    if (this.updateInterval !== undefined) {
+      clearInterval(this.updateInterval);
+    }
+  }
+
+  tick() {
+    const deltaTime = 1 / this.fps;
+    const deltaTimeStep = deltaTime / this.physicsSteps;
+    for (let i = 0; i < this.physicsSteps; i++) {
+      this.update(deltaTimeStep);
+    }
+    this.notify(SimulationActionEnum.DRAW_BALLS);
+  }
+
+  update(deltaTime: number) {
+    this.balls.forEach((ball) => {
+      ball.update(deltaTime);
+    });
   }
 
   getBalls(): Drawable[] {
@@ -19,13 +53,18 @@ export class SimulationModel extends ComponentModelBase {
   }
 
   addBalls(balls: PhysicsBall[]) {
-    this.balls = this.balls.concat(balls)
+    this.balls = this.balls.concat(balls);
+  }
+
+  get BallCount(): number {
+    return this.balls.length;
   }
 }
 
 export class SimulationUI extends ComponentUIBase {
   canvas?: HTMLCanvasElement;
   context?: CanvasRenderingContext2D;
+  startPauseButton?: HTMLButtonElement;
 
   constructor() {
     super();
@@ -35,6 +74,7 @@ export class SimulationUI extends ComponentUIBase {
     this.container = await this.loadTemplate(import.meta.url);
     this.canvas = this.container.querySelector('canvas')!;
     this.context = this.canvas.getContext('2d')!;
+    this.startPauseButton = this.container.querySelector('#start')!;
   }
 
   tearDown(): void {
@@ -46,9 +86,16 @@ export class SimulationUI extends ComponentUIBase {
   }
 
   drawAll(drawables: Drawable[]) {
+    this.context!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
     for (const drawable of drawables) {
       drawable.draw(this.context!);
     }
+  }
+
+  toggleStartPause() {
+    if (this.startPauseButton?.textContent == UIStartPauseEnum.START)
+      this.startPauseButton!.textContent = UIStartPauseEnum.PAUSE;
+    else this.startPauseButton!.textContent = UIStartPauseEnum.START;
   }
 }
 
@@ -64,13 +111,18 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     );
     this.addBallsComponent.addObserver(this);
 
-    this.addAction(SimulationActionEnum.BALL_ADDED, () => {
-      this.model.addBalls(this.addBallsComponent.getBalls())
-      this.ui.drawAll(this.model.getBalls())
-    });
+    this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
+
+    this.addAction(SimulationActionEnum.DRAW_BALLS, this.drawBalls);
   }
 
   setupUIEvents(): void {
+    this.ui.startPauseButton!.addEventListener('click', () => {
+      const state = (event?.target as HTMLButtonElement).textContent;
+      this.ui.toggleStartPause();
+      if (state == UIStartPauseEnum.START) this.model.startUpdateLoop();
+      else this.model.stopUpdateLoop();
+    });
   }
 
   async setupChildren(): Promise<void> {
@@ -80,8 +132,23 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   tearDownChildren(): void {
     this.addBallsComponent.tearDown();
   }
+
+  ballAdded = () => {
+    this.model.addBalls(this.addBallsComponent.getBalls());
+    this.drawBalls();
+  };
+
+  drawBalls = () => {
+    this.ui.drawAll(this.model.getBalls());
+  };
 }
 
 export enum SimulationActionEnum {
   BALL_ADDED = 'ballAdded',
+  DRAW_BALLS = 'drawBalls',
+}
+
+enum UIStartPauseEnum {
+  START = 'Start',
+  PAUSE = 'PAUSE',
 }
