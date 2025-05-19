@@ -65,6 +65,7 @@ export class SimulationUI extends ComponentUIBase {
   canvas?: HTMLCanvasElement;
   context?: CanvasRenderingContext2D;
   startPauseButton?: HTMLButtonElement;
+  tickButton?: HTMLButtonElement;
 
   constructor() {
     super();
@@ -75,6 +76,7 @@ export class SimulationUI extends ComponentUIBase {
     this.canvas = this.container.querySelector('canvas')!;
     this.context = this.canvas.getContext('2d')!;
     this.startPauseButton = this.container.querySelector('#start')!;
+    this.tickButton = this.container.querySelector('#tick')!;
   }
 
   tearDown(): void {
@@ -123,6 +125,10 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       if (state == UIStartPauseEnum.START) this.model.startUpdateLoop();
       else this.model.stopUpdateLoop();
     });
+
+    this.ui.tickButton!.addEventListener('click', () => {
+      this.model.tick();
+    })
   }
 
   async setupChildren(): Promise<void> {
