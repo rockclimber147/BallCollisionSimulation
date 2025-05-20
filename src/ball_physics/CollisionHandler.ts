@@ -1,5 +1,5 @@
-import { PhysicsBall } from './Ball';
-import { Drawable, Line } from '../display/Drawable';
+import { PhysicsBall } from './Ball.js';
+import { Drawable, Line } from '../display/Drawable.js';
 
 export class BallCollisionPair implements Drawable {
   ball1: PhysicsBall;
@@ -60,11 +60,9 @@ export interface CollisionHandler {
 
 export abstract class CollisionHandlerBase implements CollisionHandler {
   handlerName: string;
-  balls: PhysicsBall[];
   collisionRepresentation: Drawable[] = [];
-  constructor(handlerName: string, balls: PhysicsBall[]) {
+  constructor(handlerName: string) {
     this.handlerName = handlerName;
-    this.balls = balls;
   }
   getTimeTakenForAction(action: () => void): number {
     const startTime = performance.now();
@@ -73,22 +71,23 @@ export abstract class CollisionHandlerBase implements CollisionHandler {
     return endTime - startTime;
   }
 
-  abstract getAllPotentialCollisions(): BallCollisionPair[];
+  abstract getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[];
   abstract getCollisionRepresentation(): Drawable[];
 }
 
 export class NaiveCollisionHandler extends CollisionHandlerBase {
-  constructor(balls: PhysicsBall[]) {
-    super('Naive', balls);
+  constructor() {
+    super('Naive');
   }
 
-  getAllPotentialCollisions(): BallCollisionPair[] {
+  getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     const pairs: BallCollisionPair[] = [];
-    for (let i = 0; i < this.balls.length; i++) {
-      for (let j = i + 1; j < this.balls.length; j++) {
-        pairs.push(new BallCollisionPair(this.balls[i], this.balls[j]));
+    for (let i = 0; i < balls.length; i++) {
+      for (let j = i + 1; j < balls.length; j++) {
+        pairs.push(new BallCollisionPair(balls[i], balls[j]));
       }
     }
+    console.log(balls);
     return pairs;
   }
 

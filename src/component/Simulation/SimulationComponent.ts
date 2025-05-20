@@ -3,6 +3,11 @@ import { PhysicsBall } from '../../ball_physics/Ball.js';
 import { Drawable } from '../../display/Drawable.js';
 import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
 import { NumericSliderComponent } from '../NumericSlider/NumericSliderComponent.js';
+import {
+  CollisionHandlerBase,
+  NaiveCollisionHandler,
+  BallCollisionPair,
+} from '../../ball_physics/CollisionHandler.js';
 
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
@@ -10,9 +15,12 @@ export class SimulationModel extends ComponentModelBase {
   private updateInterval?: number;
   private updateTime: string = '0';
   physicsSteps: number = 1;
+  private collisionHandler: CollisionHandlerBase;
+  potentialCollisions: BallCollisionPair[] = [];
 
   constructor() {
     super();
+    this.collisionHandler = new NaiveCollisionHandler();
   }
 
   get UpdateTime() {
@@ -61,13 +69,19 @@ export class SimulationModel extends ComponentModelBase {
   }
 
   update(deltaTime: number) {
+    this.potentialCollisions = this.collisionHandler.getAllPotentialCollisions(this.balls);
+    this.potentialCollisions.forEach((pair) => pair.resolveCollision());
     this.balls.forEach((ball) => {
       ball.update(deltaTime);
     });
   }
 
-  getBalls(): Drawable[] {
+  getBallsAsDrawable(): Drawable[] {
     return this.balls;
+  }
+
+  getCollisionRepresentation() {
+    return this.collisionHandler.getCollisionRepresentation();
   }
 
   addBalls(balls: PhysicsBall[]) {
@@ -113,8 +127,8 @@ export class SimulationUI extends ComponentUIBase {
     drawable.draw(this.context!);
   }
 
-  drawAll(drawables: Drawable[]) {
-    this.context!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
+  drawAll(drawables: Drawable[], clear: boolean = true) {
+    if (clear) this.context!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
     for (const drawable of drawables) {
       drawable.draw(this.context!);
     }
@@ -192,7 +206,9 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   };
 
   drawBalls = () => {
-    this.ui.drawAll(this.model.getBalls());
+    this.ui.drawAll(this.model.getCollisionRepresentation(), true);
+    this.ui.drawAll(this.model.getBallsAsDrawable(), false);
+    this.ui.drawAll(this.model.potentialCollisions, false);
   };
 
   clearBalls = () => {
