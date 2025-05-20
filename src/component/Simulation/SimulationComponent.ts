@@ -6,7 +6,7 @@ import { NumericSliderComponent } from '../NumericSlider/NumericSliderComponent.
 
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
-  fps: number = 60;
+  private fps: number = 60;
   private updateInterval?: number;
   private updateTime: string = '0';
   physicsSteps: number = 1;
