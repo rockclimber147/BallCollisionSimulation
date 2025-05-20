@@ -63,6 +63,10 @@ export class SimulationModel extends ComponentModelBase {
     this.balls = this.balls.concat(balls);
   }
 
+  clearBalls() {
+    this.balls.length = 0;
+  }
+
   get BallCount(): number {
     return this.balls.length;
   }
@@ -72,6 +76,7 @@ export class SimulationUI extends ComponentUIBase {
   canvas?: HTMLCanvasElement;
   context?: CanvasRenderingContext2D;
   startPauseButton?: HTMLButtonElement;
+  clearBallsButton?: HTMLButtonElement;
   tickButton?: HTMLButtonElement;
   updateTimeSpan?: HTMLSpanElement;
 
@@ -84,6 +89,7 @@ export class SimulationUI extends ComponentUIBase {
     this.canvas = this.container.querySelector('canvas')!;
     this.context = this.canvas.getContext('2d')!;
     this.startPauseButton = this.container.querySelector('#start')!;
+    this.clearBallsButton = this.container.querySelector('#clearBalls')!;
     this.tickButton = this.container.querySelector('#tick')!;
     this.updateTimeSpan = this.container.querySelector('#updateTime')!;
   }
@@ -144,6 +150,10 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     this.ui.tickButton!.addEventListener('click', () => {
       this.model.tick();
     });
+
+    this.ui.clearBallsButton!.addEventListener('click', () => {
+      this.clearBalls();
+    });
   }
 
   async setupChildren(): Promise<void> {
@@ -161,6 +171,11 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
   drawBalls = () => {
     this.ui.drawAll(this.model.getBalls());
+  };
+
+  clearBalls = () => {
+    this.model.clearBalls();
+    this.drawBalls();
   };
 
   updateTime = () => {
