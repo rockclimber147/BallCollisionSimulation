@@ -52,6 +52,7 @@ export class SimulationModel extends ComponentModelBase {
   stopUpdateLoop() {
     if (this.updateInterval !== undefined) {
       clearInterval(this.updateInterval);
+      this.updateInterval = undefined;
     }
   }
 
