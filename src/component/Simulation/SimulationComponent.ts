@@ -2,12 +2,12 @@ import { ComponentUIBase, ComponentModelBase, ParentComponentBase } from '../Bas
 import { PhysicsBall } from '../../ball_physics/Ball.js';
 import { Drawable } from '../../display/Drawable.js';
 import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
-// import { NaiveCollisionHandler } from '../../ball_physics/CollisionHandler.js';
+import { NumericSliderComponent } from '../NumericSlider/NumericSliderComponent.js';
 
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   fps: number = 60;
-  updateInterval?: number;
+  private updateInterval?: number;
   private updateTime: string = '0';
   physicsSteps: number = 1;
 
@@ -21,6 +21,17 @@ export class SimulationModel extends ComponentModelBase {
   set UpdateTime(val: string) {
     this.updateTime = val;
     this.notify(SimulationActionEnum.UPDATE_TIME);
+  }
+
+  get FPS() {
+    return this.fps;
+  }
+  set FPS(val: number) {
+    this.fps = val;
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.startUpdateLoop();
+    }
   }
 
   startUpdateLoop() {
@@ -122,6 +133,7 @@ export class SimulationUI extends ComponentUIBase {
 
 export class SimulationComponent extends ParentComponentBase<SimulationModel, SimulationUI> {
   addBallsComponent: AddBallComponent;
+  fpsSliderComponent: NumericSliderComponent;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
 
@@ -131,6 +143,11 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       'AddBallComponent'
     );
     this.addBallsComponent.addObserver(this);
+
+    this.fpsSliderComponent = new NumericSliderComponent('fpsSlider', 'FPS: ', {
+      value: this.model.FPS,
+    });
+    this.fpsSliderComponent.addObserver(this);
 
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
 
@@ -158,6 +175,11 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
   async setupChildren(): Promise<void> {
     await this.addBallsComponent.setup();
+    await this.fpsSliderComponent.setup();
+
+    this.addAction(this.fpsSliderComponent.getID(), () => {
+      this.model.FPS = this.fpsSliderComponent.getValue();
+    });
   }
 
   tearDownChildren(): void {
