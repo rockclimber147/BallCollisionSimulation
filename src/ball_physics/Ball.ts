@@ -219,7 +219,7 @@ export class PhysicsBall extends BehaviorBall {
 
   static createRandomBall(): PhysicsBall {
     const radius = Math.min(20, Math.random() * 40 + 10);
-    const mass = Math.random() * 100
+    const mass = Math.random() * 100;
     const x = MovingBall.xBounds * 0.5 + (Math.random() - 0.5) * MovingBall.xBounds * 0.5;
     const y = MovingBall.yBounds * 0.5 + (Math.random() - 0.5) * MovingBall.yBounds * 0.5;
     const vx = (Math.random() - 0.5) * 200;

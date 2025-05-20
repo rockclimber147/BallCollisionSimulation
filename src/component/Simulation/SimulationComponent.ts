@@ -2,28 +2,31 @@ import { ComponentUIBase, ComponentModelBase, ParentComponentBase } from '../Bas
 import { PhysicsBall } from '../../ball_physics/Ball.js';
 import { Drawable } from '../../display/Drawable.js';
 import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
+// import { NaiveCollisionHandler } from '../../ball_physics/CollisionHandler.js';
 
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   fps: number = 60;
   updateInterval?: number;
-  updateTime: string = '0';
+  private updateTime: string = '0';
   physicsSteps: number = 1;
 
   constructor() {
     super();
   }
 
+  get UpdateTime() {
+    return this.updateTime;
+  }
+  set UpdateTime(val: string) {
+    this.updateTime = val;
+    this.notify(SimulationActionEnum.UPDATE_TIME);
+  }
+
   startUpdateLoop() {
     const interval = 1000 / this.fps;
     this.updateInterval = window.setInterval(() => {
-      const startTime = performance.now();
-
       this.tick();
-
-      const endTime = performance.now();
-      const timeTaken = endTime - startTime;
-      this.updateTime = timeTaken.toFixed(2);
     }, interval);
   }
 
@@ -34,11 +37,15 @@ export class SimulationModel extends ComponentModelBase {
   }
 
   tick() {
+    const startTime = performance.now();
     const deltaTime = 1 / this.fps;
     const deltaTimeStep = deltaTime / this.physicsSteps;
     for (let i = 0; i < this.physicsSteps; i++) {
       this.update(deltaTimeStep);
     }
+    const endTime = performance.now();
+    const timeTaken = endTime - startTime;
+    this.UpdateTime = timeTaken.toFixed(2);
     this.notify(SimulationActionEnum.DRAW_BALLS);
   }
 
@@ -66,6 +73,7 @@ export class SimulationUI extends ComponentUIBase {
   context?: CanvasRenderingContext2D;
   startPauseButton?: HTMLButtonElement;
   tickButton?: HTMLButtonElement;
+  updateTimeSpan?: HTMLSpanElement;
 
   constructor() {
     super();
@@ -77,6 +85,7 @@ export class SimulationUI extends ComponentUIBase {
     this.context = this.canvas.getContext('2d')!;
     this.startPauseButton = this.container.querySelector('#start')!;
     this.tickButton = this.container.querySelector('#tick')!;
+    this.updateTimeSpan = this.container.querySelector('#updateTime')!;
   }
 
   tearDown(): void {
@@ -99,6 +108,10 @@ export class SimulationUI extends ComponentUIBase {
       this.startPauseButton!.textContent = UIStartPauseEnum.PAUSE;
     else this.startPauseButton!.textContent = UIStartPauseEnum.START;
   }
+
+  setUpdateTimeSpan(time: string) {
+    this.updateTimeSpan!.innerHTML = time;
+  }
 }
 
 export class SimulationComponent extends ParentComponentBase<SimulationModel, SimulationUI> {
@@ -116,6 +129,8 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
 
     this.addAction(SimulationActionEnum.DRAW_BALLS, this.drawBalls);
+
+    this.addAction(SimulationActionEnum.UPDATE_TIME, this.updateTime);
   }
 
   setupUIEvents(): void {
@@ -128,7 +143,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
     this.ui.tickButton!.addEventListener('click', () => {
       this.model.tick();
-    })
+    });
   }
 
   async setupChildren(): Promise<void> {
@@ -147,11 +162,16 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   drawBalls = () => {
     this.ui.drawAll(this.model.getBalls());
   };
+
+  updateTime = () => {
+    this.ui.setUpdateTimeSpan(this.model.UpdateTime);
+  };
 }
 
 export enum SimulationActionEnum {
   BALL_ADDED = 'ballAdded',
   DRAW_BALLS = 'drawBalls',
+  UPDATE_TIME = 'updateTime',
 }
 
 enum UIStartPauseEnum {
