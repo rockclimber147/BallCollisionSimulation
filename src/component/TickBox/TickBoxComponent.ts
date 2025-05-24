@@ -16,6 +16,7 @@ class TickBoxUI extends ComponentUIBase {
     this.container = await this.loadTemplate(import.meta.url);
     this.tickBox = this.container.querySelector('input[type="checkbox"]')!;
     this.tickBox.id = `${this.id}TickBox`;
+    this.tickBox.checked = this.model.value;
 
     this.label = this.container.querySelector('label')!;
     this.label.htmlFor = this.tickBox.id;
