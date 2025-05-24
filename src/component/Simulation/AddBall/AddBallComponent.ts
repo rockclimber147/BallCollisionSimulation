@@ -1,6 +1,6 @@
 import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../../BaseComponent.js';
-import { NumericSliderComponent } from '../../NumericSlider/NumericSliderComponent.js';
+import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../SimulationComponent.js';
 
 export class AddBallModel extends ComponentModelBase {

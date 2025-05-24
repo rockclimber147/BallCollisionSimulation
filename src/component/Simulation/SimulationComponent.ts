@@ -2,8 +2,8 @@ import { ComponentUIBase, ComponentModelBase, ParentComponentBase } from '../Bas
 import { PhysicsBall } from '../../ball_physics/Ball.js';
 import { Drawable } from '../../display/Drawable.js';
 import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
-import { NumericSliderComponent } from '../NumericSlider/NumericSliderComponent.js';
-import { TickBoxComponent } from '../TickBox/TickBoxComponent.js';
+import { NumericSliderComponent } from '../TerminalComponents/NumericSlider/NumericSliderComponent.js';
+import { TickBoxComponent } from '../TerminalComponents/TickBox/TickBoxComponent.js';
 import {
   CollisionHandlerBase,
   NaiveCollisionHandler,

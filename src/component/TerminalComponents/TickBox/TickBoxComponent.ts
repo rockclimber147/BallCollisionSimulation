@@ -1,4 +1,4 @@
-import { ComponentModelBase, ComponentUIBase, TerminalComponentBase } from '../BaseComponent.js';
+import { ComponentModelBase, ComponentUIBase, TerminalComponentBase } from '../../BaseComponent.js';
 
 class TickBoxUI extends ComponentUIBase {
   model: TickBoxModel;
