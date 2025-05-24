@@ -151,6 +151,7 @@ export class SimulationUI extends ComponentUIBase {
 export class SimulationComponent extends ParentComponentBase<SimulationModel, SimulationUI> {
   addBallsComponent: AddBallComponent;
   fpsSliderComponent: NumericSliderComponent;
+  physicsSubStepSliderComponent: NumericSliderComponent;
   drawPotentialCollisionsToggle: TickBoxComponent;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
@@ -166,6 +167,13 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       value: this.model.FPS,
     });
     this.fpsSliderComponent.addObserver(this);
+
+    this.physicsSubStepSliderComponent = new NumericSliderComponent(
+      'physicsSubStepSlider',
+      'Physics Substeps: ',
+      { value: this.model.physicsSteps, max: 20 }
+    );
+    this.physicsSubStepSliderComponent.addObserver(this);
 
     this.drawPotentialCollisionsToggle = new TickBoxComponent(
       'drawCollisions',
@@ -202,6 +210,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     await this.addBallsComponent.setup();
     await this.fpsSliderComponent.setup();
     await this.drawPotentialCollisionsToggle.setup();
+    await this.physicsSubStepSliderComponent.setup();
 
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
@@ -209,6 +218,11 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
     this.addAction(this.drawPotentialCollisionsToggle.getID(), () => {
       this.model.drawPotentialCollisions = this.drawPotentialCollisionsToggle.getValue();
+      this.drawBalls();
+    });
+
+    this.addAction(this.physicsSubStepSliderComponent.getID(), () => {
+      this.model.physicsSteps = this.physicsSubStepSliderComponent.getValue();
     });
   }
 
