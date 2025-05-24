@@ -87,7 +87,6 @@ export class NaiveCollisionHandler extends CollisionHandlerBase {
         pairs.push(new BallCollisionPair(balls[i], balls[j]));
       }
     }
-    console.log(balls);
     return pairs;
   }
 
