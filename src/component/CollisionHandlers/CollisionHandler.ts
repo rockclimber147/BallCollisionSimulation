@@ -1,5 +1,6 @@
-import { PhysicsBall } from './Ball.js';
-import { Drawable, Line } from '../display/Drawable.js';
+import { PhysicsBall } from '../../ball_physics/Ball.js';
+import { Drawable, Line } from '../../display/Drawable.js';
+import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../BaseComponent.js';
 
 export class BallCollisionPair implements Drawable {
   ball1: PhysicsBall;
@@ -58,24 +59,37 @@ export interface CollisionHandler {
   getCollisionRepresentation(): Drawable[];
 }
 
-export abstract class CollisionHandlerBase implements CollisionHandler {
+export abstract class CollisionHandlerModelBase
+  extends ComponentModelBase
+  implements CollisionHandler
+{
   handlerName: string;
   collisionRepresentation: Drawable[] = [];
   constructor(handlerName: string) {
+    super();
     this.handlerName = handlerName;
-  }
-  getTimeTakenForAction(action: () => void): number {
-    const startTime = performance.now();
-    action();
-    const endTime = performance.now();
-    return endTime - startTime;
   }
 
   abstract getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[];
   abstract getCollisionRepresentation(): Drawable[];
 }
 
-export class NaiveCollisionHandler extends CollisionHandlerBase {
+export abstract class CollisionHandlerComponentBase<
+    M extends CollisionHandlerModelBase,
+    U extends ComponentUIBase,
+  >
+  extends ParentComponentBase<M, U>
+  implements CollisionHandler
+{
+  getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
+    return this.model.getAllPotentialCollisions(balls);
+  }
+  getCollisionRepresentation(): Drawable[] {
+    return this.model.getCollisionRepresentation();
+  }
+}
+
+export class NaiveCollisionHandler extends CollisionHandlerModelBase {
   constructor() {
     super('Naive');
   }
