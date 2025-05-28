@@ -19,6 +19,7 @@ export class SimulationModel extends ComponentModelBase {
   private collisionHandler: CollisionHandlerBase;
   potentialCollisions: BallCollisionPair[] = [];
   drawPotentialCollisions: boolean = true;
+  drawCollisionRepresentation: boolean = true;
 
   constructor() {
     super();
@@ -153,6 +154,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   fpsSliderComponent: NumericSliderComponent;
   physicsSubStepSliderComponent: NumericSliderComponent;
   drawPotentialCollisionsToggle: TickBoxComponent;
+  drawCollisionRepresentationToggle: TickBoxComponent;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
 
@@ -181,6 +183,12 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       true
     );
     this.drawPotentialCollisionsToggle.addObserver(this);
+
+    this.drawCollisionRepresentationToggle = new TickBoxComponent(
+      'drawCollisionRepresentation',
+      'Draw Collision Representation: '
+    );
+    this.drawCollisionRepresentationToggle.addObserver(this);
 
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
 
@@ -211,6 +219,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     await this.fpsSliderComponent.setup();
     await this.drawPotentialCollisionsToggle.setup();
     await this.physicsSubStepSliderComponent.setup();
+    await this.drawCollisionRepresentationToggle.setup();
 
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
@@ -218,6 +227,11 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
     this.addAction(this.drawPotentialCollisionsToggle.getID(), () => {
       this.model.drawPotentialCollisions = this.drawPotentialCollisionsToggle.getValue();
+      this.drawBalls();
+    });
+
+    this.addAction(this.drawCollisionRepresentationToggle.getID(), () => {
+      this.model.drawCollisionRepresentation = this.drawCollisionRepresentationToggle.getValue();
       this.drawBalls();
     });
 
@@ -236,7 +250,9 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   };
 
   drawBalls = () => {
-    this.ui.drawAll(this.model.getCollisionRepresentation(), true);
+    this.ui.drawAll([], true)
+    if (this.model.drawCollisionRepresentation)
+      this.ui.drawAll(this.model.getCollisionRepresentation(), false);
     this.ui.drawAll(this.model.getBallsAsDrawable(), false);
     if (this.model.drawPotentialCollisions) this.ui.drawAll(this.model.potentialCollisions, false);
   };
