@@ -5,10 +5,11 @@ import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComp
 import { NumericSliderComponent } from '../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { TickBoxComponent } from '../TerminalComponents/TickBox/TickBoxComponent.js';
 import {
-  CollisionHandlerBase,
-  NaiveCollisionHandler,
+  CollisionHandlerModelBase,
+  CollisionHandlerComponentBase,
   BallCollisionPair,
-} from '../../ball_physics/CollisionHandler.js';
+} from '../CollisionHandlers/CollisionHandler.js';
+import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
@@ -16,14 +17,12 @@ export class SimulationModel extends ComponentModelBase {
   private updateInterval?: number;
   private updateTime: string = '0';
   physicsSteps: number = 1;
-  private collisionHandler: CollisionHandlerBase;
   potentialCollisions: BallCollisionPair[] = [];
   drawPotentialCollisions: boolean = true;
   drawCollisionRepresentation: boolean = true;
 
   constructor() {
     super();
-    this.collisionHandler = new NaiveCollisionHandler();
   }
 
   get UpdateTime() {
@@ -73,7 +72,7 @@ export class SimulationModel extends ComponentModelBase {
   }
 
   update(deltaTime: number) {
-    this.potentialCollisions = this.collisionHandler.getAllPotentialCollisions(this.balls);
+    this.notify(SimulationActionEnum.UPDATE_MODEL_COLLISIONS);
     this.potentialCollisions.forEach((pair) => pair.resolveCollision());
     this.balls.forEach((ball) => {
       ball.update(deltaTime);
@@ -82,10 +81,6 @@ export class SimulationModel extends ComponentModelBase {
 
   getBallsAsDrawable(): Drawable[] {
     return this.balls;
-  }
-
-  getCollisionRepresentation() {
-    return this.collisionHandler.getCollisionRepresentation();
   }
 
   addBalls(balls: PhysicsBall[]) {
@@ -98,6 +93,10 @@ export class SimulationModel extends ComponentModelBase {
 
   get BallCount(): number {
     return this.balls.length;
+  }
+
+  getBalls(): PhysicsBall[] {
+    return this.balls;
   }
 }
 
@@ -155,6 +154,10 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   physicsSubStepSliderComponent: NumericSliderComponent;
   drawPotentialCollisionsToggle: TickBoxComponent;
   drawCollisionRepresentationToggle: TickBoxComponent;
+  collisionHandlerComponent: CollisionHandlerComponentBase<
+    CollisionHandlerModelBase,
+    ComponentUIBase
+  >;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
 
@@ -190,15 +193,23 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     );
     this.drawCollisionRepresentationToggle.addObserver(this);
 
+    this.collisionHandlerComponent = new NaiveComponent('collisionHandler');
+    this.collisionHandlerComponent.addObserver(this);
+
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
 
     this.addAction(SimulationActionEnum.DRAW_BALLS, this.drawBalls);
 
     this.addAction(SimulationActionEnum.UPDATE_TIME, this.updateTime);
+
+    this.addAction(
+      SimulationActionEnum.UPDATE_MODEL_COLLISIONS,
+      this.updateModelPotentialCollisions
+    );
   }
 
   setupUIEvents(): void {
-    this.ui.startPauseButton!.addEventListener('click', () => {
+    this.ui.startPauseButton!.addEventListener('click', (event) => {
       const state = (event?.target as HTMLButtonElement).textContent;
       this.ui.toggleStartPause();
       if (state == UIStartPauseEnum.START) this.model.startUpdateLoop();
@@ -220,6 +231,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     await this.drawPotentialCollisionsToggle.setup();
     await this.physicsSubStepSliderComponent.setup();
     await this.drawCollisionRepresentationToggle.setup();
+    await this.collisionHandlerComponent.setup();
 
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
@@ -250,9 +262,9 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   };
 
   drawBalls = () => {
-    this.ui.drawAll([], true)
+    this.ui.drawAll([], true);
     if (this.model.drawCollisionRepresentation)
-      this.ui.drawAll(this.model.getCollisionRepresentation(), false);
+      this.ui.drawAll(this.collisionHandlerComponent.getCollisionRepresentation(), false);
     this.ui.drawAll(this.model.getBallsAsDrawable(), false);
     if (this.model.drawPotentialCollisions) this.ui.drawAll(this.model.potentialCollisions, false);
   };
@@ -265,12 +277,19 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   updateTime = () => {
     this.ui.setUpdateTimeSpan(this.model.UpdateTime);
   };
+
+  updateModelPotentialCollisions = () => {
+    this.model.potentialCollisions = this.collisionHandlerComponent.getAllPotentialCollisions(
+      this.model.getBalls()
+    );
+  };
 }
 
 export enum SimulationActionEnum {
   BALL_ADDED = 'ballAdded',
   DRAW_BALLS = 'drawBalls',
   UPDATE_TIME = 'updateTime',
+  UPDATE_MODEL_COLLISIONS = 'updateModelCollisions',
 }
 
 enum UIStartPauseEnum {
