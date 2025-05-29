@@ -8,14 +8,14 @@ import {
   CollisionHandlerModelBase,
 } from '../CollisionHandler.js';
 
+import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
+
 class NaiveUI extends ComponentUIBase {
   async setup(): Promise<void> {
     this.container = await this.loadTemplate(import.meta.url);
   }
 
-  tearDown(): void {
-    this.container?.remove();
-  }
+  tearDown(): void {}
 }
 
 class NaiveModel extends CollisionHandlerModelBase {
@@ -44,7 +44,7 @@ export class NaiveComponent
     return;
   }
   constructor(targetID: string) {
-    super(new NaiveModel('Naive'), new NaiveUI(), targetID);
+    super(new NaiveModel(SimulationHandler.NAIVE), new NaiveUI(), targetID);
   }
   setupUIEvents(): void {
     return;
