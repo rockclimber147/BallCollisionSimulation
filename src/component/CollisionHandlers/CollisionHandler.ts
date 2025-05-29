@@ -56,7 +56,7 @@ export class BallCollisionPair implements Drawable {
 
 export interface CollisionHandler {
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[];
-  getCollisionRepresentation(): Drawable[];
+  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[];
 }
 
 export abstract class CollisionHandlerModelBase
@@ -71,7 +71,7 @@ export abstract class CollisionHandlerModelBase
   }
 
   abstract getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[];
-  abstract getCollisionRepresentation(): Drawable[];
+  abstract getCollisionRepresentation(balls: PhysicsBall[]): Drawable[];
 }
 
 export abstract class CollisionHandlerComponentBase<
@@ -84,7 +84,7 @@ export abstract class CollisionHandlerComponentBase<
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     return this.model.getAllPotentialCollisions(balls);
   }
-  getCollisionRepresentation(): Drawable[] {
-    return this.model.getCollisionRepresentation();
+  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[] {
+    return this.model.getCollisionRepresentation(balls);
   }
 }

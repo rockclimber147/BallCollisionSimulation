@@ -37,3 +37,48 @@ export class Line implements Drawable {
     context.globalAlpha = 1;
   }
 }
+
+export class Rectangle implements Drawable {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  alpha: number;
+  fill: boolean;
+
+  constructor(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: string = 'black',
+    alpha: number = 1,
+    fill: boolean = true
+  ) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.color = color;
+    this.alpha = alpha;
+    this.fill = fill;
+  }
+
+  draw(context: CanvasRenderingContext2D) {
+    context.globalAlpha = this.alpha;
+    context.beginPath();
+    context.rect(this.x, this.y, this.width, this.height);
+
+    if (this.fill) {
+      context.fillStyle = this.color;
+      context.fill();
+    } else {
+      context.strokeStyle = this.color;
+      context.stroke();
+    }
+
+    context.closePath();
+    context.globalAlpha = 1;
+  }
+}

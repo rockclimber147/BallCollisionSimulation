@@ -1,5 +1,5 @@
-import { PhysicsBall } from '../../../ball_physics/Ball.js';
-import { Drawable } from '../../../display/Drawable.js';
+import { Ball, PhysicsBall } from '../../../ball_physics/Ball.js';
+import { Drawable, Rectangle } from '../../../display/Drawable.js';
 import { ComponentUIBase, ParentComponentBase } from '../../BaseComponent.js';
 import {
   BallCollisionPair,
@@ -63,8 +63,26 @@ class SweepAndPruneModel extends CollisionHandlerModelBase {
     return collisionPairs;
   }
 
-  getCollisionRepresentation(): Drawable[] {
-    return [];
+  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[] {
+    const collisionRepresentation: Drawable[] = [];
+    if (this.filterX || this.filterY)
+      balls.forEach((ball: Ball) =>
+        collisionRepresentation.push(...this.getRectangleForBall(ball))
+      );
+    return collisionRepresentation;
+  }
+
+  getRectangleForBall(ball: Ball) {
+    const rectangles: Rectangle[] = [];
+    if (this.filterX)
+      rectangles.push(
+        new Rectangle(ball.x - ball.radius, 0, 2 * ball.radius, 2000, 'black', 0.2, true)
+      );
+    if (this.filterY)
+      rectangles.push(
+        new Rectangle(0, ball.y - ball.radius, 2000, 2 * ball.radius, 'black', 0.2, true)
+      );
+    return rectangles;
   }
 }
 
@@ -86,8 +104,8 @@ export class SweepAndPruneComponent
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     return this.model.getAllPotentialCollisions(balls);
   }
-  getCollisionRepresentation(): Drawable[] {
-    return this.model.getCollisionRepresentation();
+  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[] {
+    return this.model.getCollisionRepresentation(balls);
   }
 
   setupChildActions(): void {

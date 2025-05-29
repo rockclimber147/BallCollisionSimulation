@@ -291,7 +291,10 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   drawBalls = () => {
     this.ui.drawAll([], true);
     if (this.model.drawCollisionRepresentation)
-      this.ui.drawAll(this.collisionHandlerComponent.getCollisionRepresentation(), false);
+      this.ui.drawAll(
+        this.collisionHandlerComponent.getCollisionRepresentation(this.model.getBalls()),
+        false
+      );
     this.ui.drawAll(this.model.getBallsAsDrawable(), false);
     if (this.model.drawPotentialCollisions) this.ui.drawAll(this.model.potentialCollisions, false);
   };

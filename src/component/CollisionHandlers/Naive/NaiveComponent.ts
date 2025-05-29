@@ -26,8 +26,8 @@ class NaiveModel extends CollisionHandlerModelBase {
     }
     return pairs;
   }
-  getCollisionRepresentation(): Drawable[] {
-    return [];
+  getCollisionRepresentation(balls: PhysicsBall[] = []): Drawable[] {
+    return balls;
   }
 }
 
@@ -48,7 +48,7 @@ export class NaiveComponent
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     return this.model.getAllPotentialCollisions(balls);
   }
-  getCollisionRepresentation(): Drawable[] {
-    return this.model.getCollisionRepresentation();
+  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[] {
+    return this.model.getCollisionRepresentation(balls);
   }
 }

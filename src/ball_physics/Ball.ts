@@ -30,7 +30,7 @@ class Vector {
   }
 }
 
-class Ball implements Drawable {
+export class Ball implements Drawable {
   private static globalIdCount = 1;
   id: number;
   position: Vector;
