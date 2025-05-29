@@ -99,7 +99,7 @@ export class SimulationModel extends ComponentModelBase {
   }
 
   getBalls(): PhysicsBall[] {
-    return this.balls;
+    return [...this.balls];
   }
 }
 

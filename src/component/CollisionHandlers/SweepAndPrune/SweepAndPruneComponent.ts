@@ -15,15 +15,56 @@ class SweepAndPruneUI extends ComponentUIBase {
 }
 
 class SweepAndPruneModel extends CollisionHandlerModelBase {
+  getX: (ball: PhysicsBall) => number = (ball: PhysicsBall) => ball.x;
+  getY: (ball: PhysicsBall) => number = (ball: PhysicsBall) => ball.y;
+
+  filterX: boolean = true;
+  filterY: boolean = true;
+
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
-    if (balls.length < 2) return [];
-    return [];
+    let collisionPairs: BallCollisionPair[] = [];
+    if (this.filterX) collisionPairs = this.getCollisionsAlongAxis(balls, this.getX);
+    if (this.filterY && !this.filterX)
+      collisionPairs = this.getCollisionsAlongAxis(balls, this.getY);
+    if (this.filterX && this.filterY) {
+      const yFilteredPairs: BallCollisionPair[] = [];
+      collisionPairs.forEach((pair) => {
+        const yDistance = Math.abs(pair.ball1.y - pair.ball2.y);
+        if (yDistance <= pair.ball1.radius + pair.ball2.radius) yFilteredPairs.push(pair);
+      });
+      collisionPairs = yFilteredPairs;
+    }
+    return collisionPairs;
   }
+
+  getCollisionsAlongAxis(balls: PhysicsBall[], axis: (ball: PhysicsBall) => number) {
+    balls.sort((a, b) => axis(a) - axis(b));
+    const activeBalls: PhysicsBall[] = [];
+    const collisionPairs: BallCollisionPair[] = [];
+
+    let start = 0;
+
+    for (const currentBall of balls) {
+      const minX = axis(currentBall) - currentBall.radius;
+      while (
+        start < activeBalls.length &&
+        axis(activeBalls[start]) + activeBalls[start].radius < minX
+      ) {
+        start++;
+      }
+
+      for (let i = start; i < activeBalls.length; i++) {
+        collisionPairs.push(new BallCollisionPair(currentBall, activeBalls[i]));
+      }
+      activeBalls.push(currentBall);
+    }
+
+    return collisionPairs;
+  }
+
   getCollisionRepresentation(): Drawable[] {
     return [];
   }
-  checkX: boolean = true;
-  checkY: boolean = true;
 }
 
 export class SweepAndPruneComponent
