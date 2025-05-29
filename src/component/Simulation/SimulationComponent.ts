@@ -10,7 +10,6 @@ import {
   BallCollisionPair,
 } from '../CollisionHandlers/CollisionHandler.js';
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
-
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   private fps: number = 60;
@@ -152,15 +151,14 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   addBallsComponent: AddBallComponent;
   fpsSliderComponent: NumericSliderComponent;
   physicsSubStepSliderComponent: NumericSliderComponent;
-  drawPotentialCollisionsToggle: TickBoxComponent;
-  drawCollisionRepresentationToggle: TickBoxComponent;
+  drawPotentialCollisionsToggleComponent: TickBoxComponent;
+  drawCollisionRepresentationToggleComponent: TickBoxComponent;
   collisionHandlerComponent: CollisionHandlerComponentBase<
     CollisionHandlerModelBase,
     ComponentUIBase
   >;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
-
     this.addBallsComponent = new AddBallComponent(
       new AddBallModel(),
       new AddBallUI(),
@@ -180,18 +178,18 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     );
     this.physicsSubStepSliderComponent.addObserver(this);
 
-    this.drawPotentialCollisionsToggle = new TickBoxComponent(
+    this.drawPotentialCollisionsToggleComponent = new TickBoxComponent(
       'drawCollisions',
       'Draw Potential Collisions: ',
       true
     );
-    this.drawPotentialCollisionsToggle.addObserver(this);
+    this.drawPotentialCollisionsToggleComponent.addObserver(this);
 
-    this.drawCollisionRepresentationToggle = new TickBoxComponent(
+    this.drawCollisionRepresentationToggleComponent = new TickBoxComponent(
       'drawCollisionRepresentation',
       'Draw Collision Representation: '
     );
-    this.drawCollisionRepresentationToggle.addObserver(this);
+    this.drawCollisionRepresentationToggleComponent.addObserver(this);
 
     this.collisionHandlerComponent = new NaiveComponent('collisionHandler');
     this.collisionHandlerComponent.addObserver(this);
@@ -228,22 +226,23 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   async setupChildren(): Promise<void> {
     await this.addBallsComponent.setup();
     await this.fpsSliderComponent.setup();
-    await this.drawPotentialCollisionsToggle.setup();
+    await this.drawPotentialCollisionsToggleComponent.setup();
     await this.physicsSubStepSliderComponent.setup();
-    await this.drawCollisionRepresentationToggle.setup();
+    await this.drawCollisionRepresentationToggleComponent.setup();
     await this.collisionHandlerComponent.setup();
 
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
     });
 
-    this.addAction(this.drawPotentialCollisionsToggle.getID(), () => {
-      this.model.drawPotentialCollisions = this.drawPotentialCollisionsToggle.getValue();
+    this.addAction(this.drawPotentialCollisionsToggleComponent.getID(), () => {
+      this.model.drawPotentialCollisions = this.drawPotentialCollisionsToggleComponent.getValue();
       this.drawBalls();
     });
 
-    this.addAction(this.drawCollisionRepresentationToggle.getID(), () => {
-      this.model.drawCollisionRepresentation = this.drawCollisionRepresentationToggle.getValue();
+    this.addAction(this.drawCollisionRepresentationToggleComponent.getID(), () => {
+      this.model.drawCollisionRepresentation =
+        this.drawCollisionRepresentationToggleComponent.getValue();
       this.drawBalls();
     });
 
