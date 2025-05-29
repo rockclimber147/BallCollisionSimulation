@@ -10,6 +10,7 @@ import {
   BallCollisionPair,
 } from '../CollisionHandlers/CollisionHandler.js';
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
+import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   private fps: number = 60;
@@ -155,40 +156,32 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   >;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
-    this.addBallsComponent = new AddBallComponent(
-      new AddBallModel(),
-      new AddBallUI(),
-      'AddBallComponent'
+    this.addBallsComponent = this.registerChild(
+      new AddBallComponent(new AddBallModel(), new AddBallUI(), 'AddBallComponent')
     );
-    this.addBallsComponent.addObserver(this);
 
-    this.fpsSliderComponent = new NumericSliderComponent('fpsSlider', 'FPS: ', {
-      value: this.model.FPS,
-    });
-    this.fpsSliderComponent.addObserver(this);
-
-    this.physicsSubStepSliderComponent = new NumericSliderComponent(
-      'physicsSubStepSlider',
-      'Physics Substeps: ',
-      { value: this.model.physicsSteps, max: 20 }
+    this.fpsSliderComponent = this.registerChild(
+      new NumericSliderComponent('fpsSlider', 'FPS: ', {
+        value: this.model.FPS,
+      })
     );
-    this.physicsSubStepSliderComponent.addObserver(this);
 
-    this.drawPotentialCollisionsToggleComponent = new TickBoxComponent(
-      'drawCollisions',
-      'Draw Potential Collisions: ',
-      true
+    this.physicsSubStepSliderComponent = this.registerChild(
+      new NumericSliderComponent('physicsSubStepSlider', 'Physics Substeps: ', {
+        value: this.model.physicsSteps,
+        max: 20,
+      })
     );
-    this.drawPotentialCollisionsToggleComponent.addObserver(this);
 
-    this.drawCollisionRepresentationToggleComponent = new TickBoxComponent(
-      'drawCollisionRepresentation',
-      'Draw Collision Representation: '
+    this.drawPotentialCollisionsToggleComponent = this.registerChild(
+      new TickBoxComponent('drawCollisions', 'Draw Potential Collisions: ', true)
     );
-    this.drawCollisionRepresentationToggleComponent.addObserver(this);
 
-    this.collisionHandlerComponent = new NaiveComponent('collisionHandler');
-    this.collisionHandlerComponent.addObserver(this);
+    this.drawCollisionRepresentationToggleComponent = this.registerChild(
+      new TickBoxComponent('drawCollisionRepresentation', 'Draw Collision Representation: ')
+    );
+
+    this.collisionHandlerComponent = this.registerChild(new NaiveComponent('collisionHandler'));
 
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
 
@@ -224,14 +217,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     });
   }
 
-  async setupChildren(): Promise<void> {
-    await this.addBallsComponent.setup();
-    await this.fpsSliderComponent.setup();
-    await this.drawPotentialCollisionsToggleComponent.setup();
-    await this.physicsSubStepSliderComponent.setup();
-    await this.drawCollisionRepresentationToggleComponent.setup();
-    await this.collisionHandlerComponent.setup();
-
+  setupChildActions(): void {
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
     });
@@ -250,12 +236,6 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     this.addAction(this.physicsSubStepSliderComponent.getID(), () => {
       this.model.physicsSteps = this.physicsSubStepSliderComponent.getValue();
     });
-
-    this.collisionHandlerComponent.tearDown();
-  }
-
-  tearDownChildren(): void {
-    this.addBallsComponent.tearDown();
   }
 
   ballAdded = () => {
@@ -285,6 +265,14 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       this.model.getBalls()
     );
   };
+
+  async updateCollisionHandler(
+    newHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
+  ) {
+    this.collisionHandlerComponent.tearDown();
+    this.collisionHandlerComponent = this.registerChild(newHandler);
+    await newHandler.setup();
+  }
 }
 
 export enum SimulationActionEnum {

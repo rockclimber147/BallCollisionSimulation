@@ -43,11 +43,8 @@ export class SweepAndPruneComponent
     return this.model.getCollisionRepresentation();
   }
 
-  setupChildren(): Promise<void> {
-    return Promise.resolve();
-  }
-  tearDownChildren(): void {
-    throw new Error('Method not implemented.');
+  setupChildActions(): void {
+    return;
   }
   setupUIEvents(): void {
     return;

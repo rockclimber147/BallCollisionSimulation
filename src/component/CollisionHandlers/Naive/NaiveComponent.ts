@@ -35,10 +35,7 @@ export class NaiveComponent
   extends CollisionHandlerComponentBase<NaiveModel, NaiveUI>
   implements CollisionHandler
 {
-  setupChildren(): Promise<void> {
-    return Promise.resolve();
-  }
-  tearDownChildren(): void {
+  setupChildActions(): void {
     return;
   }
   constructor(targetID: string) {

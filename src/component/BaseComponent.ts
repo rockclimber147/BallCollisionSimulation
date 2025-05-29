@@ -44,7 +44,7 @@ class SubjectBase implements Subject {
 interface ComponentUI {
   setup(): void;
   tearDown(): void;
-  inject(targetId: string): void;
+  inject(targetId: string): HTMLElement;
 }
 
 type ElementListener = {
@@ -98,12 +98,13 @@ abstract class ComponentUIBase extends ObserverBase implements ComponentUI {
     return template.content.cloneNode(true) as HTMLElement;
   }
 
-  inject(targetId: string): void {
+  inject(targetId: string): HTMLElement {
     const target = document.getElementById(targetId);
     if (!target) throw new Error(`Target element with id "${targetId}" not found.`);
     if (!this.container) throw new Error(`No container to inject for UI component.`);
 
     target.appendChild(this.container);
+    return target;
   }
 }
 
@@ -117,6 +118,7 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
   protected readonly ui: U;
   protected readonly targetId: string;
   private readonly subject = new SubjectBase();
+  private uiContainer?: HTMLElement;
 
   constructor(model: M, ui: U, targetId: string) {
     super();
@@ -141,7 +143,7 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
 
   async setup(): Promise<void> {
     await this.ui.setup();
-    this.ui.inject(this.targetId);
+    this.uiContainer = this.ui.inject(this.targetId);
     this.setupUIEvents();
   }
 
@@ -150,11 +152,12 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
   tearDown(): void {
     this.model.removeObserver(this.ui);
     this.ui.tearDown();
+    this.uiContainer!.innerHTML = '';
   }
 }
 
 interface ParentComponent {
-  setupChildren(): Promise<void>;
+  setupChildActions(): void;
   tearDownChildren(): void;
 }
 
@@ -163,13 +166,29 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
   implements ParentComponent
 {
   children: ComponentBase<ComponentModelBase, ComponentUIBase>[] = [];
-  abstract setupChildren(): Promise<void>;
 
-  abstract tearDownChildren(): void;
+  protected registerChild<T extends ComponentBase<ComponentModelBase, ComponentUIBase>>(
+    child: T
+  ): T {
+    this.children.push(child);
+    child.addObserver(this);
+    return child;
+  }
+
+  async setupChildren(): Promise<void> {
+    await Promise.all(this.children.map((child) => child.setup()));
+  }
+
+  abstract setupChildActions(): void;
+
+  tearDownChildren(): void {
+    this.children.forEach((child) => child.tearDown());
+  }
 
   async setup(): Promise<void> {
     await super.setup();
     await this.setupChildren();
+    this.setupChildActions();
   }
 
   tearDown(): void {

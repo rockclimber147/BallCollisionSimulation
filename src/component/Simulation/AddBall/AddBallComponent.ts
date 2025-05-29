@@ -130,16 +130,19 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
   massSlider: NumericSliderComponent;
   constructor(model: AddBallModel, ui: AddBallUI, targetId: string) {
     super(model, ui, targetId);
-    this.radiusSlider = new NumericSliderComponent('radius', 'Radius', {
-      value: this.model.radius,
-    });
-    this.radiusSlider.addObserver(this);
-    this.massSlider = new NumericSliderComponent('mass', 'Mass', { value: this.model.mass });
-    this.massSlider.addObserver(this);
-    this.amountSlider = new NumericSliderComponent('amount', 'Choose Amount', {
-      value: this.model.toAddCount,
-    });
-    this.amountSlider.addObserver(this);
+    this.radiusSlider = this.registerChild(
+      new NumericSliderComponent('radius', 'Radius', {
+        value: this.model.radius,
+      })
+    );
+    this.massSlider = this.registerChild(
+      new NumericSliderComponent('mass', 'Mass', { value: this.model.mass })
+    );
+    this.amountSlider = this.registerChild(
+      new NumericSliderComponent('amount', 'Choose Amount', {
+        value: this.model.toAddCount,
+      })
+    );
   }
 
   setupUIEvents(): void {
@@ -163,11 +166,7 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
     });
   }
 
-  async setupChildren(): Promise<void> {
-    await this.radiusSlider.setup();
-    await this.massSlider.setup();
-    await this.amountSlider.setup();
-
+  setupChildActions(): void {
     this.addAction(this.radiusSlider.getID(), () => {
       this.model.radius = this.radiusSlider.getValue();
     });
@@ -179,10 +178,6 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
     this.addAction(this.amountSlider.getID(), () => {
       this.model.toAddCount = this.amountSlider.getValue();
     });
-  }
-
-  tearDownChildren(): void {
-    throw new Error('Method not implemented.');
   }
 
   getBalls(): PhysicsBall[] {
