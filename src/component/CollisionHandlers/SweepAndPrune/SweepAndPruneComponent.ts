@@ -1,9 +1,10 @@
 import { Ball, PhysicsBall } from '../../../ball_physics/Ball.js';
 import { Drawable, Rectangle } from '../../../display/Drawable.js';
-import { ComponentUIBase, ParentComponentBase } from '../../BaseComponent.js';
+import { ComponentUIBase } from '../../BaseComponent.js';
 import {
   BallCollisionPair,
   CollisionHandler,
+  CollisionHandlerComponentBase,
   CollisionHandlerModelBase,
 } from '../CollisionHandler.js';
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
@@ -76,18 +77,34 @@ class SweepAndPruneModel extends CollisionHandlerModelBase {
     const rectangles: Rectangle[] = [];
     if (this.filterX)
       rectangles.push(
-        new Rectangle(ball.x - ball.radius, 0, 2 * ball.radius, 2000, 'black', 0.2, true)
+        new Rectangle(
+          ball.x - ball.radius,
+          this.collisionBounds.y,
+          2 * ball.radius,
+          this.collisionBounds.height,
+          'black',
+          0.2,
+          true
+        )
       );
     if (this.filterY)
       rectangles.push(
-        new Rectangle(0, ball.y - ball.radius, 2000, 2 * ball.radius, 'black', 0.2, true)
+        new Rectangle(
+          this.collisionBounds.x,
+          ball.y - ball.radius,
+          this.collisionBounds.width,
+          2 * ball.radius,
+          'black',
+          0.2,
+          true
+        )
       );
     return rectangles;
   }
 }
 
 export class SweepAndPruneComponent
-  extends ParentComponentBase<SweepAndPruneModel, SweepAndPruneUI>
+  extends CollisionHandlerComponentBase<SweepAndPruneModel, SweepAndPruneUI>
   implements CollisionHandler
 {
   sortX: TickBoxComponent;

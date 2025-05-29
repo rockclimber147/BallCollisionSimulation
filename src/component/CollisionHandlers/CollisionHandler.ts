@@ -54,6 +54,20 @@ export class BallCollisionPair implements Drawable {
   }
 }
 
+export class SimulationBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+
+  constructor(x: number = 0, y: number = 0, width: number = 1000, height: number = 1000) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+}
+
 export interface CollisionHandler {
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[];
   getCollisionRepresentation(balls: PhysicsBall[]): Drawable[];
@@ -63,6 +77,7 @@ export abstract class CollisionHandlerModelBase
   extends ComponentModelBase
   implements CollisionHandler
 {
+  collisionBounds: SimulationBounds = new SimulationBounds();
   handlerName: string;
   collisionRepresentation: Drawable[] = [];
   constructor(handlerName: string) {
@@ -81,6 +96,9 @@ export abstract class CollisionHandlerComponentBase<
   extends ParentComponentBase<M, U>
   implements CollisionHandler
 {
+  setCollisionBounds(bounds: SimulationBounds) {
+    this.model.collisionBounds = bounds;
+  }
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     return this.model.getAllPotentialCollisions(balls);
   }

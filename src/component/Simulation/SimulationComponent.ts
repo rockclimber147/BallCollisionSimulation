@@ -9,6 +9,7 @@ import {
   CollisionHandlerModelBase,
   CollisionHandlerComponentBase,
   BallCollisionPair,
+  SimulationBounds,
 } from '../CollisionHandlers/CollisionHandler.js';
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
@@ -256,6 +257,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   }
 
   setupChildActions(): void {
+    this.updateCollisionHandlerBounds();
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
     });
@@ -314,11 +316,18 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     );
   };
 
+  updateCollisionHandlerBounds() {
+    this.collisionHandlerComponent.setCollisionBounds(
+      new SimulationBounds(0, 0, this.ui.canvas!.width, this.ui.canvas!.height)
+    );
+  }
+
   async updateCollisionHandler(
     newHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
   ) {
     this.collisionHandlerComponent.tearDown();
     this.collisionHandlerComponent = this.registerChild(newHandler);
+    this.updateCollisionHandlerBounds();
     await newHandler.setup();
   }
 }
