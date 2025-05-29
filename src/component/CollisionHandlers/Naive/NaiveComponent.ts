@@ -14,8 +14,6 @@ class NaiveUI extends ComponentUIBase {
   async setup(): Promise<void> {
     this.container = await this.loadTemplate(import.meta.url);
   }
-
-  tearDown(): void {}
 }
 
 class NaiveModel extends CollisionHandlerModelBase {

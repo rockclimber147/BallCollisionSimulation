@@ -22,9 +22,6 @@ class TickBoxUI extends ComponentUIBase {
     this.label.htmlFor = this.tickBox.id;
     this.label.innerHTML = this.id;
   }
-  tearDown(): void {
-    this.container?.remove();
-  }
 }
 
 class TickBoxModel extends ComponentModelBase {

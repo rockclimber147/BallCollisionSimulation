@@ -107,10 +107,6 @@ export class AddBallUI extends ComponentUIBase {
     }
   }
 
-  tearDown(): void {
-    this.container?.remove();
-  }
-
   get modeSelect(): HTMLSelectElement | undefined {
     return this._modeSelect;
   }

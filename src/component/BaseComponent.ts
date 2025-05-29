@@ -47,14 +47,36 @@ interface ComponentUI {
   inject(targetId: string): void;
 }
 
+type ElementListener = {
+  element: HTMLElement;
+  type: string;
+  action: (event: Event) => void;
+};
+
 abstract class ComponentUIBase extends ObserverBase implements ComponentUI {
   protected container?: HTMLElement;
+  protected registeredListeners: ElementListener[] = [];
 
   abstract setup(): Promise<void>;
-  abstract tearDown(): void;
+  tearDown(): void {
+    this.registeredListeners.forEach((listener) => this.removeEventListener(listener));
+  }
 
   constructor() {
     super();
+  }
+
+  protected registerEventListener(
+    element: HTMLElement,
+    type: string,
+    action: (event: Event) => void
+  ): void {
+    this.registeredListeners.push({ element: element, type: type, action: action });
+    element.addEventListener(type, action);
+  }
+
+  protected removeEventListener(listener: ElementListener) {
+    listener.element.removeEventListener(listener.type, listener.action);
   }
 
   protected async loadTemplate(url: string): Promise<HTMLElement> {
@@ -149,8 +171,7 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
 
   tearDown(): void {
     this.tearDownChildren();
-    this.model.removeObserver(this.ui);
-    this.ui.tearDown();
+    super.tearDown();
   }
 }
 
@@ -162,11 +183,6 @@ abstract class TerminalComponentBase<
     await this.ui.setup();
     this.ui.inject(this.targetId);
     this.setupUIEvents();
-  }
-
-  tearDown(): void {
-    this.model.removeObserver(this.ui);
-    this.ui.tearDown();
   }
 }
 

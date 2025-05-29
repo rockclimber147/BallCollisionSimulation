@@ -121,10 +121,6 @@ export class SimulationUI extends ComponentUIBase {
     this.updateTimeSpan = this.container.querySelector('#updateTime')!;
   }
 
-  tearDown(): void {
-    this.container?.remove();
-  }
-
   draw(drawable: Drawable) {
     drawable.draw(this.context!);
   }
@@ -249,6 +245,8 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     this.addAction(this.physicsSubStepSliderComponent.getID(), () => {
       this.model.physicsSteps = this.physicsSubStepSliderComponent.getValue();
     });
+
+    this.collisionHandlerComponent.tearDown();
   }
 
   tearDownChildren(): void {

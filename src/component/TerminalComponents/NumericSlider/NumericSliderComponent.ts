@@ -31,9 +31,6 @@ class NumericSliderUI extends ComponentUIBase {
     this.display.id = `${this.id}Display`;
     this.display.innerHTML = this.model.value.toString();
   }
-  tearDown(): void {
-    this.container?.remove();
-  }
 }
 
 class NumericSliderModel extends ComponentModelBase {
