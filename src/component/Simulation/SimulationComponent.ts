@@ -4,12 +4,15 @@ import { Drawable } from '../../display/Drawable.js';
 import { AddBallComponent, AddBallModel, AddBallUI } from './AddBall/AddBallComponent.js';
 import { NumericSliderComponent } from '../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { TickBoxComponent } from '../TerminalComponents/TickBox/TickBoxComponent.js';
+import { DropDownComponent } from '../TerminalComponents/Dropdown/DropDownComponent.js';
 import {
   CollisionHandlerModelBase,
   CollisionHandlerComponentBase,
   BallCollisionPair,
 } from '../CollisionHandlers/CollisionHandler.js';
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
+import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
+import { SimulationHandler } from './SimulationEnums.js';
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   private fps: number = 60;
@@ -144,9 +147,15 @@ export class SimulationUI extends ComponentUIBase {
 }
 
 export class SimulationComponent extends ParentComponentBase<SimulationModel, SimulationUI> {
+  handlerComponentTarget: string = 'collisionHandler';
+  handlerMap: Map<
+    string,
+    CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
+  >;
   addBallsComponent: AddBallComponent;
   fpsSliderComponent: NumericSliderComponent;
   physicsSubStepSliderComponent: NumericSliderComponent;
+  collisionHandlerSelect: DropDownComponent;
   drawPotentialCollisionsToggleComponent: TickBoxComponent;
   drawCollisionRepresentationToggleComponent: TickBoxComponent;
   collisionHandlerComponent: CollisionHandlerComponentBase<
@@ -155,6 +164,17 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   >;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
+
+    this.handlerMap = new Map<
+      string,
+      CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
+    >();
+    this.handlerMap.set(SimulationHandler.NAIVE, new NaiveComponent(this.handlerComponentTarget));
+    this.handlerMap.set(
+      SimulationHandler.SWEEP_AND_PRUNE,
+      new SweepAndPruneComponent(this.handlerComponentTarget)
+    );
+
     this.addBallsComponent = this.registerChild(
       new AddBallComponent(new AddBallModel(), new AddBallUI(), 'AddBallComponent')
     );
@@ -172,6 +192,12 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       })
     );
 
+    this.collisionHandlerSelect = this.registerChild(
+      new DropDownComponent('collisionHandlerSelect', 'Current Collision Handler: ', [
+        ...this.handlerMap.keys(),
+      ])
+    );
+
     this.drawPotentialCollisionsToggleComponent = this.registerChild(
       new TickBoxComponent('drawCollisions', 'Draw Potential Collisions: ', true)
     );
@@ -180,7 +206,9 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       new TickBoxComponent('drawCollisionRepresentation', 'Draw Collision Representation: ')
     );
 
-    this.collisionHandlerComponent = this.registerChild(new NaiveComponent('collisionHandler'));
+    this.collisionHandlerComponent = this.registerChild(
+      new NaiveComponent(this.handlerComponentTarget)
+    );
 
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
 
@@ -234,6 +262,13 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
     this.addAction(this.physicsSubStepSliderComponent.getID(), () => {
       this.model.physicsSteps = this.physicsSubStepSliderComponent.getValue();
+    });
+
+    this.addAction(this.collisionHandlerSelect.getID(), async () => {
+      await this.updateCollisionHandler(
+        this.handlerMap.get(this.collisionHandlerSelect.getValue())!
+      );
+      this.drawBalls();
     });
   }
 
