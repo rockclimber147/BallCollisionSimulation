@@ -8,6 +8,8 @@ import {
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
 import { Ball, PhysicsBall } from '../../../ball_physics/Ball.js';
 import { Drawable, Line } from '../../../display/Drawable.js';
+import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
+import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
 
 class UniformGridUI extends ComponentUIBase {
   model: UniformGridModel;
@@ -52,29 +54,15 @@ class UniformGridModel extends CollisionHandlerModelBase {
     const lines: Drawable[] = [];
     const cellWidth = this.collisionBounds.width / this.xCells;
     const cellHeight = this.collisionBounds.height / this.yCells;
-    if (this.xCells >= 2) {
-      for (let x = 1; x < this.xCells; x++) {
-        lines.push(
-          new Line(
-            x * cellWidth,
-            this.collisionBounds.y,
-            x * cellWidth,
-            this.collisionBounds.height
-          )
-        );
-      }
+    for (let x = 1; x < this.xCells; x++) {
+      lines.push(
+        new Line(x * cellWidth, this.collisionBounds.y, x * cellWidth, this.collisionBounds.height)
+      );
     }
-    if (this.yCells >= 2) {
-      for (let y = 1; y < this.xCells; y++) {
-        lines.push(
-          new Line(
-            this.collisionBounds.x,
-            y * cellHeight,
-            this.collisionBounds.width,
-            y * cellHeight
-          )
-        );
-      }
+    for (let y = 1; y < this.yCells; y++) {
+      lines.push(
+        new Line(this.collisionBounds.x, y * cellHeight, this.collisionBounds.width, y * cellHeight)
+      );
     }
     return lines;
   }
@@ -107,6 +95,7 @@ class Grid {
       }
       cells.push(column);
     }
+    this.cells = cells;
     return cells;
   }
 
@@ -131,13 +120,39 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   UniformGridModel,
   UniformGridUI
 > {
+  xCellsSlider: NumericSliderComponent;
+  yCellsSlider: NumericSliderComponent;
   constructor(targetId: string) {
     const model = new UniformGridModel();
     super(model, new UniformGridUI(model), targetId);
+    this.xCellsSlider = this.registerChild(
+      new NumericSliderComponent('xCellsSlider', 'X cell count: ', {
+        value: this.model.xCells,
+        max: 10,
+      })
+    );
+    this.yCellsSlider = this.registerChild(
+      new NumericSliderComponent('yCellsSlider', 'Y cell count: ', {
+        value: this.model.yCells,
+        max: 10,
+      })
+    );
   }
 
   setupChildActions(): void {
-    return;
+    this.addAction(this.xCellsSlider.getID(), () => {
+      this.model.xCells = this.xCellsSlider.getValue();
+      this.refresh();
+    });
+    this.addAction(this.yCellsSlider.getID(), () => {
+      this.model.yCells = this.yCellsSlider.getValue();
+      this.refresh();
+    });
+  }
+
+  refresh() {
+    this.model.constructGrid();
+    this.notify(SimulationActionEnum.DRAW_BALLS);
   }
 
   setupUIEvents(): void {}
