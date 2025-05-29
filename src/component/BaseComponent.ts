@@ -139,7 +139,11 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
     this.subject.notify(notificationType);
   }
 
-  abstract setup(): Promise<void>;
+  async setup(): Promise<void> {
+    await this.ui.setup();
+    this.ui.inject(this.targetId);
+    this.setupUIEvents();
+  }
 
   abstract setupUIEvents(): void;
 
@@ -158,15 +162,14 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
   extends ComponentBase<M, U>
   implements ParentComponent
 {
+  children: ComponentBase<ComponentModelBase, ComponentUIBase>[] = [];
   abstract setupChildren(): Promise<void>;
 
   abstract tearDownChildren(): void;
 
   async setup(): Promise<void> {
-    await this.ui.setup();
-    this.ui.inject(this.targetId);
+    await super.setup();
     await this.setupChildren();
-    this.setupUIEvents();
   }
 
   tearDown(): void {
@@ -175,21 +178,4 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
   }
 }
 
-abstract class TerminalComponentBase<
-  M extends ComponentModelBase,
-  U extends ComponentUIBase,
-> extends ComponentBase<M, U> {
-  async setup(): Promise<void> {
-    await this.ui.setup();
-    this.ui.inject(this.targetId);
-    this.setupUIEvents();
-  }
-}
-
-export {
-  ComponentUIBase,
-  ComponentModelBase,
-  ComponentBase,
-  TerminalComponentBase,
-  ParentComponentBase,
-};
+export { ComponentUIBase, ComponentModelBase, ComponentBase, ParentComponentBase };

@@ -1,4 +1,4 @@
-import { ComponentModelBase, ComponentUIBase, TerminalComponentBase } from '../../BaseComponent.js';
+import { ComponentModelBase, ComponentUIBase, ComponentBase } from '../../BaseComponent.js';
 
 class NumericSliderUI extends ComponentUIBase {
   model: NumericSliderModel;
@@ -47,10 +47,7 @@ class NumericSliderModel extends ComponentModelBase {
   }
 }
 
-export class NumericSliderComponent extends TerminalComponentBase<
-  NumericSliderModel,
-  NumericSliderUI
-> {
+export class NumericSliderComponent extends ComponentBase<NumericSliderModel, NumericSliderUI> {
   private id: string;
   constructor(targetId: string, id: string, options: NumericSliderOptions = {}) {
     const model = new NumericSliderModel(options);

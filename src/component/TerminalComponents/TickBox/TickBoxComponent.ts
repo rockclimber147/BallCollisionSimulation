@@ -1,4 +1,4 @@
-import { ComponentModelBase, ComponentUIBase, TerminalComponentBase } from '../../BaseComponent.js';
+import { ComponentModelBase, ComponentUIBase, ComponentBase } from '../../BaseComponent.js';
 
 class TickBoxUI extends ComponentUIBase {
   model: TickBoxModel;
@@ -33,7 +33,7 @@ class TickBoxModel extends ComponentModelBase {
   }
 }
 
-export class TickBoxComponent extends TerminalComponentBase<TickBoxModel, TickBoxUI> {
+export class TickBoxComponent extends ComponentBase<TickBoxModel, TickBoxUI> {
   private id: string;
   constructor(targetId: string, id: string, value: boolean = true) {
     const model = new TickBoxModel(value);
