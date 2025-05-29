@@ -7,6 +7,7 @@ import {
   CollisionHandlerModelBase,
 } from '../CollisionHandler.js';
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
+import { TickBoxComponent } from '../../TerminalComponents/TickBox/TickBoxComponent.js';
 
 class SweepAndPruneUI extends ComponentUIBase {
   async setup(): Promise<void> {
@@ -71,12 +72,16 @@ export class SweepAndPruneComponent
   extends ParentComponentBase<SweepAndPruneModel, SweepAndPruneUI>
   implements CollisionHandler
 {
+  sortX: TickBoxComponent;
+  sortY: TickBoxComponent;
   constructor(targetID: string) {
     super(
       new SweepAndPruneModel(SimulationHandler.SWEEP_AND_PRUNE),
       new SweepAndPruneUI(),
       targetID
     );
+    this.sortX = this.registerChild(new TickBoxComponent('sortX', 'X axis: '));
+    this.sortY = this.registerChild(new TickBoxComponent('sortX', 'Y axis: '));
   }
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     return this.model.getAllPotentialCollisions(balls);
@@ -86,6 +91,8 @@ export class SweepAndPruneComponent
   }
 
   setupChildActions(): void {
+    this.addAction(this.sortX.getID(), () => (this.model.filterX = this.sortX.getValue()));
+    this.addAction(this.sortY.getID(), () => (this.model.filterY = this.sortY.getValue()));
     return;
   }
   setupUIEvents(): void {
