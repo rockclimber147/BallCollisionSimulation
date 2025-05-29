@@ -42,7 +42,9 @@ export class TickBoxComponent extends TerminalComponentBase<TickBoxModel, TickBo
   }
 
   setupUIEvents(): void {
-    this.ui.tickBox?.addEventListener('input', (event) => {
+    const ui = this.ui;
+
+    ui.registerEventListener(ui.tickBox!, 'input', (event) => {
       const target = event.target as HTMLInputElement;
       this.model.value = target.checked;
       this.notify(this.id);

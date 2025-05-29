@@ -59,11 +59,13 @@ export class NumericSliderComponent extends TerminalComponentBase<
   }
 
   setupUIEvents(): void {
-    this.ui.slider?.addEventListener('input', (event) => {
+    const ui = this.ui;
+
+    ui.registerEventListener(ui.slider!, 'input', (event) => {
       const target = event.target as HTMLInputElement;
       const value = Number(target.value);
       this.model.value = value;
-      this.ui.display!.innerHTML = value.toString();
+      ui.display!.innerHTML = value.toString();
       this.notify(this.id);
     });
   }

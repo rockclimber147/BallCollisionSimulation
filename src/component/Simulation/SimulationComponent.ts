@@ -203,18 +203,23 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   }
 
   setupUIEvents(): void {
-    this.ui.startPauseButton!.addEventListener('click', (event) => {
+    const ui = this.ui;
+
+    ui.registerEventListener(ui.startPauseButton!, 'click', (event) => {
       const state = (event?.target as HTMLButtonElement).textContent;
-      this.ui.toggleStartPause();
-      if (state == UIStartPauseEnum.START) this.model.startUpdateLoop();
-      else this.model.stopUpdateLoop();
+      ui.toggleStartPause();
+      if (state === UIStartPauseEnum.START) {
+        this.model.startUpdateLoop();
+      } else {
+        this.model.stopUpdateLoop();
+      }
     });
 
-    this.ui.tickButton!.addEventListener('click', () => {
+    ui.registerEventListener(ui.tickButton!, 'click', () => {
       this.model.tick();
     });
 
-    this.ui.clearBallsButton!.addEventListener('click', () => {
+    ui.registerEventListener(ui.clearBallsButton!, 'click', () => {
       this.clearBalls();
     });
   }

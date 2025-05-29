@@ -143,11 +143,12 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
   }
 
   setupUIEvents(): void {
-    this.ui.addButton?.addEventListener('click', () => {
+    const ui = this.ui;
+    ui.registerEventListener(ui.addButton!, 'click', () => {
       this.notify(SimulationActionEnum.BALL_ADDED);
     });
 
-    this.ui.modeSelect?.addEventListener('change', (event) => {
+    ui.registerEventListener(ui.modeSelect!, 'change', (event) => {
       const selectedMode = (event.target as HTMLSelectElement).value as
         | BallModeEnum.RANDOM
         | BallModeEnum.SPECIFIC;
@@ -155,7 +156,7 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
       this.ui.toggleSpecificFields(this.model.mode);
     });
 
-    this.ui.colorInput?.addEventListener('change', (event) => {
+    ui.registerEventListener(ui.colorInput!, 'change', (event) => {
       const target = event.target as HTMLInputElement;
       const value = target.value;
       this.model.color = value;

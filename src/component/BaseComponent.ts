@@ -66,7 +66,7 @@ abstract class ComponentUIBase extends ObserverBase implements ComponentUI {
     super();
   }
 
-  protected registerEventListener(
+  public registerEventListener(
     element: HTMLElement,
     type: string,
     action: (event: Event) => void
