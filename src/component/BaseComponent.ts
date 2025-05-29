@@ -175,6 +175,11 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
     return child;
   }
 
+  protected deregisterChild(child: ComponentBase<ComponentModelBase, ComponentUIBase>) {
+    this.children.filter((currentChild) => currentChild != child);
+    child.removeObserver(this);
+  }
+
   async setupChildren(): Promise<void> {
     await Promise.all(this.children.map((child) => child.setup()));
   }
@@ -182,7 +187,10 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
   abstract setupChildActions(): void;
 
   tearDownChildren(): void {
-    this.children.forEach((child) => child.tearDown());
+    this.children.forEach((child) => {
+      this.deregisterChild(child);
+      child.tearDown();
+    });
   }
 
   async setup(): Promise<void> {
