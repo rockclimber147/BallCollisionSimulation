@@ -16,6 +16,7 @@ class SweepAndPruneUI extends ComponentUIBase {
 
 class SweepAndPruneModel extends CollisionHandlerModelBase {
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
+    if (balls.length < 2) return [];
     return [];
   }
   getCollisionRepresentation(): Drawable[] {
