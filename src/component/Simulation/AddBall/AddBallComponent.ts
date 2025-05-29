@@ -1,11 +1,12 @@
 import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../../BaseComponent.js';
+import { DropDownComponent } from '../../TerminalComponents/Dropdown/DropDownComponent.js';
 import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../SimulationComponent.js';
 
 export class AddBallModel extends ComponentModelBase {
   private _toAddCount: number = 1;
-  private _mode: BallModeEnum.RANDOM | BallModeEnum.SPECIFIC = BallModeEnum.RANDOM;
+  private _mode: string = BallModeEnum.RANDOM;
   private _color: string = '#ff0000';
   private _radius: number = 10;
   private _mass: number = 50;
@@ -41,11 +42,11 @@ export class AddBallModel extends ComponentModelBase {
     }
     this._toAddCount = count;
   }
-  get mode(): BallModeEnum.RANDOM | BallModeEnum.SPECIFIC {
+  get mode(): string {
     return this._mode;
   }
 
-  set mode(newMode: BallModeEnum.RANDOM | BallModeEnum.SPECIFIC) {
+  set mode(newMode: string) {
     this._mode = newMode;
   }
 
@@ -81,7 +82,6 @@ export class AddBallModel extends ComponentModelBase {
 }
 
 export class AddBallUI extends ComponentUIBase {
-  private _modeSelect?: HTMLSelectElement;
   private _specificFieldsDiv?: HTMLDivElement;
   private _colorInput?: HTMLInputElement;
   private _addButton?: HTMLButtonElement;
@@ -93,22 +93,17 @@ export class AddBallUI extends ComponentUIBase {
   async setup() {
     this.container = await this.loadTemplate(import.meta.url);
 
-    this._modeSelect = this.container.querySelector('#mode')!;
     this._specificFieldsDiv = this.container.querySelector('#specificFields')!;
     this._colorInput = this.container.querySelector('#color')!;
     this._addButton = this.container.querySelector('#add')!;
   }
 
-  public toggleSpecificFields(mode: BallModeEnum.RANDOM | BallModeEnum.SPECIFIC) {
+  public toggleSpecificFields(mode: string) {
     if (mode == BallModeEnum.SPECIFIC) {
       this._specificFieldsDiv!.style.display = 'block';
     } else {
       this._specificFieldsDiv!.style.display = 'none';
     }
-  }
-
-  get modeSelect(): HTMLSelectElement | undefined {
-    return this._modeSelect;
   }
 
   get specificFieldsDiv(): HTMLDivElement | undefined {
@@ -125,11 +120,19 @@ export class AddBallUI extends ComponentUIBase {
 }
 
 export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallUI> {
+  modeSelectDropdown: DropDownComponent;
   amountSlider: NumericSliderComponent;
   radiusSlider: NumericSliderComponent;
   massSlider: NumericSliderComponent;
   constructor(model: AddBallModel, ui: AddBallUI, targetId: string) {
     super(model, ui, targetId);
+    const ballModeValues: string[] = Object.keys(BallModeEnum).map(
+      (key) => BallModeEnum[key as keyof typeof BallModeEnum]
+    );
+    this.modeSelectDropdown = this.registerChild(
+      new DropDownComponent('dropdownComponent', 'Mode Select', ballModeValues)
+    );
+
     this.radiusSlider = this.registerChild(
       new NumericSliderComponent('radius', 'Radius', {
         value: this.model.radius,
@@ -151,14 +154,6 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
       this.notify(SimulationActionEnum.BALL_ADDED);
     });
 
-    ui.registerEventListener(ui.modeSelect!, 'change', (event) => {
-      const selectedMode = (event.target as HTMLSelectElement).value as
-        | BallModeEnum.RANDOM
-        | BallModeEnum.SPECIFIC;
-      this.model.mode = selectedMode;
-      this.ui.toggleSpecificFields(this.model.mode);
-    });
-
     ui.registerEventListener(ui.colorInput!, 'change', (event) => {
       const target = event.target as HTMLInputElement;
       const value = target.value;
@@ -177,6 +172,11 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
 
     this.addAction(this.amountSlider.getID(), () => {
       this.model.toAddCount = this.amountSlider.getValue();
+    });
+
+    this.addAction(this.modeSelectDropdown.getID(), () => {
+      this.model.mode = this.modeSelectDropdown.getValue();
+      this.ui.toggleSpecificFields(this.model.mode);
     });
   }
 
