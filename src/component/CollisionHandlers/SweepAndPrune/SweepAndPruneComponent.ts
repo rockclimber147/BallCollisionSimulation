@@ -6,10 +6,11 @@ import {
   CollisionHandler,
   CollisionHandlerModelBase,
 } from '../CollisionHandler.js';
+import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
 
 class SweepAndPruneUI extends ComponentUIBase {
-  setup(): Promise<void> {
-    return Promise.resolve();
+  async setup(): Promise<void> {
+    this.container = await this.loadTemplate(import.meta.url);
   }
 
   tearDown(): void {
@@ -19,10 +20,10 @@ class SweepAndPruneUI extends ComponentUIBase {
 
 class SweepAndPruneModel extends CollisionHandlerModelBase {
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
-    throw new Error('Method not implemented.');
+    return [];
   }
   getCollisionRepresentation(): Drawable[] {
-    throw new Error('Method not implemented.');
+    return [];
   }
   checkX: boolean = true;
   checkY: boolean = true;
@@ -32,6 +33,13 @@ export class SweepAndPruneComponent
   extends ParentComponentBase<SweepAndPruneModel, SweepAndPruneUI>
   implements CollisionHandler
 {
+  constructor(targetID: string) {
+    super(
+      new SweepAndPruneModel(SimulationHandler.SWEEP_AND_PRUNE),
+      new SweepAndPruneUI(),
+      targetID
+    );
+  }
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     return this.model.getAllPotentialCollisions(balls);
   }
@@ -40,12 +48,12 @@ export class SweepAndPruneComponent
   }
 
   setupChildren(): Promise<void> {
-    throw new Error('Method not implemented.');
+    return Promise.resolve();
   }
   tearDownChildren(): void {
     throw new Error('Method not implemented.');
   }
   setupUIEvents(): void {
-    throw new Error('Method not implemented.');
+    return;
   }
 }
