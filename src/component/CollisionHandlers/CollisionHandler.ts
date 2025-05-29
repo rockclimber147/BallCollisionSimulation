@@ -88,23 +88,3 @@ export abstract class CollisionHandlerComponentBase<
     return this.model.getCollisionRepresentation();
   }
 }
-
-export class NaiveCollisionHandler extends CollisionHandlerModelBase {
-  constructor() {
-    super('Naive');
-  }
-
-  getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
-    const pairs: BallCollisionPair[] = [];
-    for (let i = 0; i < balls.length; i++) {
-      for (let j = i + 1; j < balls.length; j++) {
-        pairs.push(new BallCollisionPair(balls[i], balls[j]));
-      }
-    }
-    return pairs;
-  }
-
-  getCollisionRepresentation(): Drawable[] {
-    return this.collisionRepresentation;
-  }
-}
