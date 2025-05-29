@@ -13,11 +13,12 @@ import {
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
 import { SimulationHandler } from './SimulationEnums.js';
+import { CSSHelper } from '../../display/CSSHelper.js';
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   private fps: number = 60;
   private updateInterval?: number;
-  private updateTime: string = '0';
+  private updateTime: number = 0;
   physicsSteps: number = 1;
   potentialCollisions: BallCollisionPair[] = [];
   drawPotentialCollisions: boolean = true;
@@ -30,7 +31,7 @@ export class SimulationModel extends ComponentModelBase {
   get UpdateTime() {
     return this.updateTime;
   }
-  set UpdateTime(val: string) {
+  set UpdateTime(val: number) {
     this.updateTime = val;
     this.notify(SimulationActionEnum.UPDATE_TIME);
   }
@@ -69,7 +70,7 @@ export class SimulationModel extends ComponentModelBase {
     }
     const endTime = performance.now();
     const timeTaken = endTime - startTime;
-    this.UpdateTime = timeTaken.toFixed(2);
+    this.UpdateTime = timeTaken;
     this.notify(SimulationActionEnum.DRAW_BALLS);
   }
 
@@ -103,6 +104,7 @@ export class SimulationModel extends ComponentModelBase {
 }
 
 export class SimulationUI extends ComponentUIBase {
+  timeSpanIsRed: boolean = false;
   canvas?: HTMLCanvasElement;
   context?: CanvasRenderingContext2D;
   startPauseButton?: HTMLButtonElement;
@@ -141,8 +143,17 @@ export class SimulationUI extends ComponentUIBase {
     else this.startPauseButton!.textContent = UIStartPauseEnum.START;
   }
 
-  setUpdateTimeSpan(time: string) {
-    this.updateTimeSpan!.innerHTML = time;
+  setUpdateTimeSpan(time: number, targetFPS: number) {
+    if (time > 1000 / targetFPS && !this.timeSpanIsRed) {
+      CSSHelper.addStyle(this.updateTimeSpan!, 'color: red');
+      this.timeSpanIsRed = true;
+
+      setTimeout(() => {
+        CSSHelper.removeStyle(this.updateTimeSpan!, 'color: red');
+        this.timeSpanIsRed = false;
+      }, 300);
+    }
+    this.updateTimeSpan!.innerHTML = time.toFixed(2);
   }
 }
 
@@ -291,7 +302,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   };
 
   updateTime = () => {
-    this.ui.setUpdateTimeSpan(this.model.UpdateTime);
+    this.ui.setUpdateTimeSpan(this.model.UpdateTime, this.model.FPS);
   };
 
   updateModelPotentialCollisions = () => {
