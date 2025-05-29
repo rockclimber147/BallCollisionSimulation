@@ -15,6 +15,7 @@ import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
 import { SimulationHandler } from './SimulationEnums.js';
 import { CSSHelper } from '../../display/CSSHelper.js';
+import { UniformGridComponent } from '../CollisionHandlers/UniformGrid/UniformGridComponent.js';
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   private fps: number = 60;
@@ -186,7 +187,10 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       SimulationHandler.SWEEP_AND_PRUNE,
       new SweepAndPruneComponent(this.handlerComponentTarget)
     );
-
+    this.handlerMap.set(
+      SimulationHandler.UNIFORM_GRID,
+      new UniformGridComponent(this.handlerComponentTarget)
+    );
     this.addBallsComponent = this.registerChild(
       new AddBallComponent(new AddBallModel(), new AddBallUI(), 'AddBallComponent')
     );
