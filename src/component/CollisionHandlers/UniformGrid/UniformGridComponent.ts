@@ -10,6 +10,7 @@ import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { Drawable, Line } from '../../../display/Drawable.js';
 import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
+import { SweepAndPruneComponent } from '../SweepAndPrune/SweepAndPruneComponent.js';
 
 class UniformGridUI extends ComponentUIBase {
   async setup(): Promise<void> {
@@ -21,6 +22,7 @@ class UniformGridModel extends CollisionHandlerModelBase {
   xCells: number = 2;
   yCells: number = 2;
   grid: Grid;
+  subhandler?: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>;
 
   constructor() {
     super(SimulationHandler.UNIFORM_GRID);
@@ -37,11 +39,7 @@ class UniformGridModel extends CollisionHandlerModelBase {
     balls.forEach((ball) => this.grid.addBall(ball));
     this.grid.getCells().forEach((cell) => {
       const balls = cell.balls;
-      for (let i = 0; i < balls.length; i++) {
-        for (let j = i + 1; j < balls.length; j++) {
-          collisions.push(new BallCollisionPair(balls[i], balls[j]));
-        }
-      }
+      collisions.push(...this.subhandler!.getAllPotentialCollisions(balls));
     });
     return collisions;
   }
@@ -49,6 +47,11 @@ class UniformGridModel extends CollisionHandlerModelBase {
   getCollisionRepresentation(): Drawable[] {
     const representation: Drawable[] = [];
     representation.push(...this.grid.getGridLines());
+    this.grid.getCells().forEach((cell) => {
+      const balls = cell.balls;
+      this.subhandler?.setCollisionBounds(cell.bounds);
+      representation.push(...this.subhandler!.getCollisionRepresentation(balls));
+    });
     return representation;
   }
 }
@@ -164,8 +167,11 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   UniformGridModel,
   UniformGridUI
 > {
+  subHandlerTarget: string = 'subHandler';
   xCellsSlider: NumericSliderComponent;
   yCellsSlider: NumericSliderComponent;
+  // subHandlerSelect: CollisionHandlerSelectComponent
+  subHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>;
   constructor(targetId: string) {
     super(new UniformGridModel(), new UniformGridUI(), targetId);
     this.xCellsSlider = this.registerChild(
@@ -180,6 +186,10 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
         max: 10,
       })
     );
+
+    // this.subHandlerSelect = this.registerChild(new CollisionHandlerSelectComponent("subHandlerSelect", "subHandler: ", this.subHandlerTarget, true))
+    this.subHandler = this.registerChild(new SweepAndPruneComponent(this.subHandlerTarget));
+    this.model.subhandler = this.subHandler;
   }
 
   setupChildActions(): void {
@@ -192,6 +202,9 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
       this.model.yCells = this.yCellsSlider.getValue();
       this.refresh();
     });
+    // this.addAction(this.subHandlerSelect.getID(), () => {
+
+    // })
   }
 
   refresh() {
@@ -199,5 +212,22 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
     this.notify(SimulationActionEnum.DRAW_BALLS);
   }
 
+  async updateCollisionHandler(
+    newHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
+  ) {
+    this.subHandler.tearDown();
+    this.subHandler = this.registerChild(newHandler);
+    await newHandler.setup();
+  }
+
   setupUIEvents(): void {}
 }
+
+// TODO
+// Make this a lot less brittle by implementing another handlerselectcomponent
+// to make this work I need to fix id assignment so they are unique in the whole DOM (right now
+// the componentselect part of the handlerselect hyml has a duplicate id and this will probably
+// be an issue for other components as well down the line)
+
+// figure out how to generate a unique id while keeping the readability of having the ids in the
+// html.
