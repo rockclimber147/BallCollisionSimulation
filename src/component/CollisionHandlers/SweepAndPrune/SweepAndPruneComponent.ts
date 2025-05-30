@@ -17,8 +17,8 @@ class SweepAndPruneUI extends ComponentUIBase {
 }
 
 class SweepAndPruneModel extends CollisionHandlerModelBase {
-  getX: (ball: PhysicsBall) => number = (ball: PhysicsBall) => ball.x;
-  getY: (ball: PhysicsBall) => number = (ball: PhysicsBall) => ball.y;
+  getX: (ball: PhysicsBall) => number = (ball: PhysicsBall) => ball.x - ball.radius;
+  getY: (ball: PhysicsBall) => number = (ball: PhysicsBall) => ball.y - ball.radius;
 
   filterX: boolean = true;
   filterY: boolean = true;
@@ -47,10 +47,10 @@ class SweepAndPruneModel extends CollisionHandlerModelBase {
     let start = 0;
 
     for (const currentBall of balls) {
-      const minX = axis(currentBall) - currentBall.radius;
+      const minX = axis(currentBall);
       while (
         start < activeBalls.length &&
-        axis(activeBalls[start]) + activeBalls[start].radius < minX
+        axis(activeBalls[start]) + 2 * activeBalls[start].radius < minX
       ) {
         start++;
       }
