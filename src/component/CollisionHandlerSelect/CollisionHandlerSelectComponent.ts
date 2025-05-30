@@ -25,15 +25,17 @@ class CollisionHandlerSelectUI extends ComponentUIBase {
 }
 
 class CollisionHandlerSelectModel extends ComponentModelBase {
+  isHandlerParent: boolean;
   handlerMap: Map<
     string,
     CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
   >;
   value: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>;
   handlerComponentTarget: string;
-  constructor(handlerComponentTarget: string) {
+  constructor(handlerComponentTarget: string, isHandlerParent: boolean) {
     super();
     this.handlerComponentTarget = handlerComponentTarget;
+    this.isHandlerParent = isHandlerParent;
     this.handlerMap = new Map<
       string,
       CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
@@ -52,10 +54,11 @@ class CollisionHandlerSelectModel extends ComponentModelBase {
       SimulationHandler.SWEEP_AND_PRUNE,
       new SweepAndPruneComponent(this.handlerComponentTarget)
     );
-    this.handlerMap.set(
-      SimulationHandler.UNIFORM_GRID,
-      new UniformGridComponent(this.handlerComponentTarget)
-    );
+    if (!this.isHandlerParent)
+      this.handlerMap.set(
+        SimulationHandler.UNIFORM_GRID,
+        new UniformGridComponent(this.handlerComponentTarget)
+      );
   }
 }
 
@@ -65,8 +68,13 @@ export class CollisionHandlerSelectComponent extends ParentComponentBase<
 > {
   private id: string;
   componentSelect: DropDownComponent;
-  constructor(targetId: string, id: string, handlerComponentTarget: string) {
-    const model = new CollisionHandlerSelectModel(handlerComponentTarget);
+  constructor(
+    targetId: string,
+    id: string,
+    handlerComponentTarget: string,
+    isHandlerParent = false
+  ) {
+    const model = new CollisionHandlerSelectModel(handlerComponentTarget, isHandlerParent);
     super(model, new CollisionHandlerSelectUI(model, id), targetId);
     this.id = id;
     this.componentSelect = this.registerChild(
