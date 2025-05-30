@@ -12,13 +12,6 @@ import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/N
 import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
 
 class UniformGridUI extends ComponentUIBase {
-  model: UniformGridModel;
-
-  constructor(model: UniformGridModel) {
-    super();
-    this.model = model;
-  }
-
   async setup(): Promise<void> {
     this.container = await this.loadTemplate(import.meta.url);
   }
@@ -174,8 +167,7 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   xCellsSlider: NumericSliderComponent;
   yCellsSlider: NumericSliderComponent;
   constructor(targetId: string) {
-    const model = new UniformGridModel();
-    super(model, new UniformGridUI(model), targetId);
+    super(new UniformGridModel(), new UniformGridUI(), targetId);
     this.xCellsSlider = this.registerChild(
       new NumericSliderComponent('xCellsSlider', 'X cell count: ', {
         value: this.model.xCells,
