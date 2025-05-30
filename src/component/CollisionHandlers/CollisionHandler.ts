@@ -70,7 +70,7 @@ export class SimulationBounds {
 
 export interface CollisionHandler {
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[];
-  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[];
+  getCollisionRepresentation(balls?: PhysicsBall[]): Drawable[];
 }
 
 export abstract class CollisionHandlerModelBase

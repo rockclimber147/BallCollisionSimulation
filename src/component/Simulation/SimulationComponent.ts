@@ -261,7 +261,6 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   }
 
   setupChildActions(): void {
-    this.updateCollisionHandlerBounds();
     this.addAction(this.fpsSliderComponent.getID(), () => {
       this.model.FPS = this.fpsSliderComponent.getValue();
     });

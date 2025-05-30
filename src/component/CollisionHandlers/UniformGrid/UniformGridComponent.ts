@@ -6,7 +6,7 @@ import {
   SimulationBounds,
 } from '../CollisionHandler.js';
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
-import { Ball, PhysicsBall } from '../../../ball_physics/Ball.js';
+import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { Drawable, Line } from '../../../display/Drawable.js';
 import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
@@ -31,23 +31,103 @@ class UniformGridModel extends CollisionHandlerModelBase {
 
   constructor() {
     super(SimulationHandler.UNIFORM_GRID);
-    this.grid = this.constructGrid();
+    this.grid = new Grid(this.xCells, this.yCells, this.collisionBounds);
   }
 
-  constructGrid(): Grid {
-    return new Grid(this.xCells, this.yCells, this.collisionBounds);
+  constructGrid() {
+    this.grid = new Grid(this.xCells, this.yCells, this.collisionBounds);
   }
 
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     const collisions: BallCollisionPair[] = [];
+    this.grid.clear();
     balls.forEach((ball) => this.grid.addBall(ball));
+    this.grid.getCells().forEach((cell) => {
+      const balls = cell.balls;
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          collisions.push(new BallCollisionPair(balls[i], balls[j]));
+        }
+      }
+    });
     return collisions;
   }
 
-  getCollisionRepresentation(balls: PhysicsBall[] = []): Drawable[] {
+  getCollisionRepresentation(): Drawable[] {
     const representation: Drawable[] = [];
-    representation.push(...this.getGridLines());
+    representation.push(...this.grid.getGridLines());
     return representation;
+  }
+}
+
+class Grid {
+  xCells: number;
+  yCells: number;
+  cellWidth: number;
+  cellHeight: number;
+  cells: Cell[][];
+  collisionBounds: SimulationBounds;
+
+  constructor(xCells: number, yCells: number, bounds: SimulationBounds) {
+    this.xCells = xCells;
+    this.yCells = yCells;
+    this.cellWidth = bounds.width / this.xCells;
+    this.cellHeight = bounds.height / this.yCells;
+
+    this.cells = this.constructGrid();
+    this.collisionBounds = bounds;
+  }
+
+  constructGrid(): Cell[][] {
+    const cells: Cell[][] = [];
+    for (let x = 0; x < this.xCells; x++) {
+      const column: Cell[] = [];
+      for (let y = 0; y < this.yCells; y++) {
+        column.push(
+          new Cell(x * this.cellWidth, y * this.cellHeight, this.cellWidth, this.cellHeight)
+        );
+      }
+      cells.push(column);
+    }
+    this.cells = cells;
+    return cells;
+  }
+
+  addBall(ball: PhysicsBall) {
+    const minX = Math.floor((ball.x - ball.radius) / this.cellWidth);
+    const maxX = Math.floor((ball.x + ball.radius) / this.cellWidth);
+    const minY = Math.floor((ball.y - ball.radius) / this.cellHeight);
+    const maxY = Math.floor((ball.y + ball.radius) / this.cellHeight);
+    for (let x = minX; x <= maxX; x++) {
+      for (let y = minY; y <= maxY; y++) {
+        if (this.coordinatesAreInbounds(x, y)) {
+          this.cells[x][y].add(ball);
+        }
+      }
+    }
+  }
+
+  coordinatesAreInbounds(x: number, y: number): boolean {
+    return x >= 0 && x < this.xCells && y >= 0 && y < this.yCells;
+  }
+
+  getCells(): Cell[] {
+    return this.cells.reduce((acc, row) => acc.concat(row), []);
+  }
+
+  clear() {
+    this.getCells().forEach((cell) => cell.clear());
+  }
+
+  toString() {
+    let str = '';
+    for (const row of this.cells) {
+      for (const cell of row) {
+        str += `${cell} `;
+      }
+      str += '\n';
+    }
+    return str;
   }
 
   getGridLines(): Drawable[] {
@@ -68,44 +148,6 @@ class UniformGridModel extends CollisionHandlerModelBase {
   }
 }
 
-class Grid {
-  xCells: number;
-  yCells: number;
-  cellWidth: number;
-  cellHeight: number;
-  cells: Cell[][];
-
-  constructor(xCells: number, yCells: number, bounds: SimulationBounds) {
-    this.xCells = xCells;
-    this.yCells = yCells;
-    this.cellWidth = this.xCells / bounds.width;
-    this.cellHeight = this.yCells / bounds.height;
-
-    this.cells = this.constructGrid();
-  }
-
-  constructGrid(): Cell[][] {
-    const cells: Cell[][] = [];
-    for (let x = 0; x < this.xCells; x++) {
-      const column: Cell[] = [];
-      for (let y = 0; y < this.yCells; y++) {
-        column.push(
-          new Cell(x * this.cellWidth, y * this.cellHeight, this.cellWidth, this.cellHeight)
-        );
-      }
-      cells.push(column);
-    }
-    this.cells = cells;
-    return cells;
-  }
-
-  addBall(ball: Ball) {}
-
-  getCells(): Cell[] {
-    return this.cells.reduce((acc, row) => acc.concat(row), []);
-  }
-}
-
 class Cell {
   balls: PhysicsBall[];
   bounds: SimulationBounds;
@@ -113,6 +155,15 @@ class Cell {
   constructor(x: number, y: number, width: number, height: number) {
     this.balls = [];
     this.bounds = new SimulationBounds(x, y, width, height);
+  }
+  clear() {
+    this.balls.length = 0;
+  }
+  add(ball: PhysicsBall) {
+    this.balls.push(ball);
+  }
+  toString() {
+    return `${this.balls.length}`;
   }
 }
 
@@ -140,6 +191,7 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   }
 
   setupChildActions(): void {
+    this.refresh();
     this.addAction(this.xCellsSlider.getID(), () => {
       this.model.xCells = this.xCellsSlider.getValue();
       this.refresh();
