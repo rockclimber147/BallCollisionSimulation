@@ -171,7 +171,6 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
     child: T
   ): T {
     this.children.push(child);
-    child.addObserver(this);
     return child;
   }
 
@@ -182,6 +181,7 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
 
   async setupChildren(): Promise<void> {
     await Promise.all(this.children.map((child) => child.setup()));
+    this.children.forEach((child) => child.addObserver(this));
   }
 
   abstract setupChildActions(): void;
