@@ -1,0 +1,95 @@
+import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../BaseComponent.js';
+import {
+  CollisionHandlerComponentBase,
+  CollisionHandlerModelBase,
+} from '../CollisionHandlers/CollisionHandler.js';
+import { SimulationHandler } from '../Simulation/SimulationEnums.js';
+import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
+import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
+import { UniformGridComponent } from '../CollisionHandlers/UniformGrid/UniformGridComponent.js';
+import { DropDownComponent } from '../TerminalComponents/Dropdown/DropDownComponent.js';
+
+class CollisionHandlerSelectUI extends ComponentUIBase {
+  model: CollisionHandlerSelectModel;
+  id: string;
+
+  constructor(model: CollisionHandlerSelectModel, id: string) {
+    super();
+    this.model = model;
+    this.id = id;
+  }
+
+  async setup(): Promise<void> {
+    this.container = await this.loadTemplate(import.meta.url);
+  }
+}
+
+class CollisionHandlerSelectModel extends ComponentModelBase {
+  handlerMap: Map<
+    string,
+    CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
+  >;
+  value: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>;
+  handlerComponentTarget: string;
+  constructor(handlerComponentTarget: string) {
+    super();
+    this.handlerComponentTarget = handlerComponentTarget;
+    this.handlerMap = new Map<
+      string,
+      CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
+    >();
+    this.constructMap();
+    this.value = this.handlerMap.get(SimulationHandler.NAIVE)!;
+  }
+
+  updateValue(handlerName: string) {
+    this.value = this.handlerMap.get(handlerName)!;
+  }
+
+  constructMap() {
+    this.handlerMap.set(SimulationHandler.NAIVE, new NaiveComponent(this.handlerComponentTarget));
+    this.handlerMap.set(
+      SimulationHandler.SWEEP_AND_PRUNE,
+      new SweepAndPruneComponent(this.handlerComponentTarget)
+    );
+    this.handlerMap.set(
+      SimulationHandler.UNIFORM_GRID,
+      new UniformGridComponent(this.handlerComponentTarget)
+    );
+  }
+}
+
+export class CollisionHandlerSelectComponent extends ParentComponentBase<
+  CollisionHandlerSelectModel,
+  CollisionHandlerSelectUI
+> {
+  private id: string;
+  componentSelect: DropDownComponent;
+  constructor(targetId: string, id: string, handlerComponentTarget: string) {
+    const model = new CollisionHandlerSelectModel(handlerComponentTarget);
+    super(model, new CollisionHandlerSelectUI(model, id), targetId);
+    this.id = id;
+    this.componentSelect = this.registerChild(
+      new DropDownComponent('componentSelect', 'Select handler to use', [
+        ...this.model.handlerMap.keys(),
+      ])
+    );
+  }
+
+  setupChildActions(): void {
+    this.addAction(this.componentSelect.getID(), () => {
+      this.model.updateValue(this.componentSelect.getValue());
+      this.notify(this.id);
+    });
+  }
+
+  setupUIEvents(): void {}
+
+  getID() {
+    return this.id;
+  }
+
+  getValue(): CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase> {
+    return this.model.value;
+  }
+}
