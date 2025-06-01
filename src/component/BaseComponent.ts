@@ -58,7 +58,7 @@ abstract class ComponentUIBase extends ObserverBase implements ComponentUI {
   protected container?: HTMLElement;
   protected registeredListeners: ElementListener[] = [];
   private static id = 0;
-  protected idMap: Map<string, string>;
+  private idMap: Map<string, string>;
 
   abstract setup(): Promise<void>;
   tearDown(): void {
@@ -248,6 +248,7 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
 
   tearDownChildren(): void {
     this.children.forEach((child) => {
+      child.removeObserver(this)
       child.tearDown();
     });
   }
