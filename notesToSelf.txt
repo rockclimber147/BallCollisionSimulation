@@ -1,0 +1,15 @@
+When I switch out the uniform grid subhandlers and then teardown and re create the grid, there is a lot of duplicate UI stuff.
+
+THe duplicate fragments work with the simulation but ui updates don't
+
+When I switch the dropdown and then  switch from UG to other to UG, the UG subH dropdown reverts to naive, issue with data persistence and recreating it causing duplicates?
+
+Some times I get an error in the console that the component container does not exist to teardown (calling replaceChildren on it)
+
+Looks like the amount of stuff that is duplicated is multiplied by 3 each time (the amount of children in the dropdown)
+
+Issue seems to be isolated to switching out the UG to other things from simulation
+
+
+
+Look into handler switch component
