@@ -307,13 +307,17 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   async updateCollisionHandler(
     newHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
   ) {
-    this.deregisterChild(this.collisionHandlerComponent);
-    this.collisionHandlerComponent.tearDown();
+    if (this.collisionHandlerComponent) {
+      this.deregisterChild(this.collisionHandlerComponent);
+      this.collisionHandlerComponent.tearDown();
+    }
+
     this.collisionHandlerComponent = this.registerChild(newHandler);
+
     this.collisionHandlerComponent.addObserver(this);
     this.updateCollisionHandlerBounds();
     this.collisionHandlerComponent.updateTargetId(this.ui);
-    await newHandler.setup();
+    await this.collisionHandlerComponent.setup();
   }
 }
 

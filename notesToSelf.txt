@@ -13,3 +13,16 @@ Issue seems to be isolated to switching out the UG to other things from simulati
 
 
 Look into handler switch component
+
+
+
+COMPONENT LIFECYCLE:
+
+Base component:
+constructor: 
+sets model and ui as well as the targetID of the element to inject itself into
+
+setup:
+calls ui setup:
+    sets the container to the results of loadTemplate, which parses a document fragment from the related HTML
+    ui is responsible for 
