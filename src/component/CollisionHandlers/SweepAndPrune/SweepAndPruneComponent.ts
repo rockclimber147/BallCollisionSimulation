@@ -3,7 +3,6 @@ import { Drawable, Rectangle } from '../../../display/Drawable.js';
 import { ComponentUIBase } from '../../BaseComponent.js';
 import {
   BallCollisionPair,
-  CollisionHandler,
   CollisionHandlerComponentBase,
   CollisionHandlerModelBase,
 } from '../CollisionHandler.js';
@@ -103,10 +102,10 @@ class SweepAndPruneModel extends CollisionHandlerModelBase {
   }
 }
 
-export class SweepAndPruneComponent
-  extends CollisionHandlerComponentBase<SweepAndPruneModel, SweepAndPruneUI>
-  implements CollisionHandler
-{
+export class SweepAndPruneComponent extends CollisionHandlerComponentBase<
+  SweepAndPruneModel,
+  SweepAndPruneUI
+> {
   sortX: TickBoxComponent;
   sortY: TickBoxComponent;
   constructor(targetID: string) {
@@ -117,12 +116,6 @@ export class SweepAndPruneComponent
     );
     this.sortX = this.registerChild(new TickBoxComponent('sortX', 'X axis: '));
     this.sortY = this.registerChild(new TickBoxComponent('sortX', 'Y axis: '));
-  }
-  getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
-    return this.model.getAllPotentialCollisions(balls);
-  }
-  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[] {
-    return this.model.getCollisionRepresentation(balls);
   }
 
   setupChildActions(): void {

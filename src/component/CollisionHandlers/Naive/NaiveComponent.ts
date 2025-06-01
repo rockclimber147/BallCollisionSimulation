@@ -3,7 +3,6 @@ import { Drawable } from '../../../display/Drawable.js';
 import { ComponentUIBase } from '../../BaseComponent.js';
 import {
   BallCollisionPair,
-  CollisionHandler,
   CollisionHandlerComponentBase,
   CollisionHandlerModelBase,
 } from '../CollisionHandler.js';
@@ -31,10 +30,7 @@ class NaiveModel extends CollisionHandlerModelBase {
   }
 }
 
-export class NaiveComponent
-  extends CollisionHandlerComponentBase<NaiveModel, NaiveUI>
-  implements CollisionHandler
-{
+export class NaiveComponent extends CollisionHandlerComponentBase<NaiveModel, NaiveUI> {
   setupChildActions(): void {
     return;
   }
@@ -43,12 +39,5 @@ export class NaiveComponent
   }
   setupUIEvents(): void {
     return;
-  }
-
-  getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
-    return this.model.getAllPotentialCollisions(balls);
-  }
-  getCollisionRepresentation(balls: PhysicsBall[]): Drawable[] {
-    return this.model.getCollisionRepresentation(balls);
   }
 }
