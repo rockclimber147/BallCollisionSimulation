@@ -83,7 +83,7 @@ export class CollisionHandlerSelectComponent extends ParentComponentBase<
     super(model, new CollisionHandlerSelectUI(model, id), targetId);
     this.id = id;
     this.componentSelect = this.registerChild(
-      new DropDownComponent(CollisionHandlerSelectIds.COMPONENT_SELECT, 'Select handler to use', [
+      new DropDownComponent(CollisionHandlerSelectIds.COMPONENT_SELECT, id, [
         ...this.model.handlerMap.keys(),
       ])
     );

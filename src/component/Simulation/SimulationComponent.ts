@@ -309,6 +309,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   ) {
     this.collisionHandlerComponent.tearDown();
     this.collisionHandlerComponent = this.registerChild(newHandler);
+    this.collisionHandlerComponent.addObserver(this);
     this.updateCollisionHandlerBounds();
     this.collisionHandlerComponent.updateTargetId(this.ui);
     await newHandler.setup();

@@ -8,6 +8,7 @@ import {
 } from '../CollisionHandler.js';
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
 import { TickBoxComponent } from '../../TerminalComponents/TickBox/TickBoxComponent.js';
+import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
 
 class SweepAndPruneUI extends ComponentUIBase {
   async setup(): Promise<void> {
@@ -119,8 +120,14 @@ export class SweepAndPruneComponent extends CollisionHandlerComponentBase<
   }
 
   setupChildActions(): void {
-    this.addAction(this.sortX.getID(), () => (this.model.filterX = this.sortX.getValue()));
-    this.addAction(this.sortY.getID(), () => (this.model.filterY = this.sortY.getValue()));
+    this.addAction(this.sortX.getID(), () => {
+      this.model.filterX = this.sortX.getValue();
+      this.notify(SimulationActionEnum.DRAW_BALLS);
+    });
+    this.addAction(this.sortY.getID(), () => {
+      this.model.filterY = this.sortY.getValue();
+      this.notify(SimulationActionEnum.DRAW_BALLS);
+    });
     return;
   }
   setupUIEvents(): void {

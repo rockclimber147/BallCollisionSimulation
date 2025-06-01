@@ -5,12 +5,12 @@ import {
   CollisionHandlerModelBase,
   SimulationBounds,
 } from '../CollisionHandler.js';
+import { CollisionHandlerSelectComponent } from '../../CollisionHandlerSelect/CollisionHandlerSelectComponent.js';
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
 import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { Drawable, Line } from '../../../display/Drawable.js';
 import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
-import { SweepAndPruneComponent } from '../SweepAndPrune/SweepAndPruneComponent.js';
 
 class UniformGridUI extends ComponentUIBase {
   async setup(): Promise<void> {
@@ -39,6 +39,7 @@ class UniformGridModel extends CollisionHandlerModelBase {
     balls.forEach((ball) => this.grid.addBall(ball));
     this.grid.getCells().forEach((cell) => {
       const balls = cell.balls;
+      this.subhandler?.setCollisionBounds(cell.bounds);
       collisions.push(...this.subhandler!.getAllPotentialCollisions(balls));
     });
     return collisions;
@@ -170,7 +171,7 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   subHandlerTarget: string = 'subHandler';
   xCellsSlider: NumericSliderComponent;
   yCellsSlider: NumericSliderComponent;
-  // subHandlerSelect: CollisionHandlerSelectComponent
+  subHandlerSelect: CollisionHandlerSelectComponent;
   subHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>;
   constructor(targetId: string) {
     super(new UniformGridModel(), new UniformGridUI(), targetId);
@@ -187,9 +188,20 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
       })
     );
 
-    // this.subHandlerSelect = this.registerChild(new CollisionHandlerSelectComponent("subHandlerSelect", "subHandler: ", this.subHandlerTarget, true))
-    this.subHandler = this.registerChild(new SweepAndPruneComponent(this.subHandlerTarget));
+    this.subHandlerSelect = this.registerChild(
+      new CollisionHandlerSelectComponent(
+        'subHandlerSelect',
+        'Grid sub handler: ',
+        this.subHandlerTarget,
+        true
+      )
+    );
+    this.subHandler = this.registerChild(this.subHandlerSelect.getValue());
     this.model.subhandler = this.subHandler;
+
+    this.addAction(SimulationActionEnum.DRAW_BALLS, () =>
+      this.notify(SimulationActionEnum.DRAW_BALLS)
+    );
   }
 
   setupChildActions(): void {
@@ -202,14 +214,10 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
       this.model.yCells = this.yCellsSlider.getValue();
       this.refresh();
     });
-    // this.addAction(this.subHandlerSelect.getID(), () => {
-
-    // })
-  }
-
-  refresh() {
-    this.model.constructGrid();
-    this.notify(SimulationActionEnum.DRAW_BALLS);
+    this.addAction(this.subHandlerSelect.getID(), async () => {
+      await this.updateCollisionHandler(this.subHandlerSelect.getValue()!);
+      this.notify(SimulationActionEnum.DRAW_BALLS);
+    });
   }
 
   async updateCollisionHandler(
@@ -217,17 +225,16 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   ) {
     this.subHandler.tearDown();
     this.subHandler = this.registerChild(newHandler);
-    await newHandler.setup();
+    this.model.subhandler = this.subHandler;
+    this.subHandler.updateTargetId(this.ui);
+    this.subHandler.addObserver(this);
+    await this.subHandler.setup();
+  }
+
+  refresh() {
+    this.model.constructGrid();
+    this.notify(SimulationActionEnum.DRAW_BALLS);
   }
 
   setupUIEvents(): void {}
 }
-
-// TODO
-// Make this a lot less brittle by implementing another handlerselectcomponent
-// to make this work I need to fix id assignment so they are unique in the whole DOM (right now
-// the componentselect part of the handlerselect hyml has a duplicate id and this will probably
-// be an issue for other components as well down the line)
-
-// figure out how to generate a unique id while keeping the readability of having the ids in the
-// html.
