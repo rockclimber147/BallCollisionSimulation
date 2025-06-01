@@ -27,6 +27,7 @@ class DropDownComponentUI extends ComponentUIBase {
       option.text = value;
       this.dropDown!.appendChild(option);
     });
+    this.dropDown.value = this.model.value;
   }
 }
 
