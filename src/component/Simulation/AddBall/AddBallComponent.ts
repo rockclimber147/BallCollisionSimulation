@@ -93,9 +93,10 @@ export class AddBallUI extends ComponentUIBase {
   async setup() {
     this.container = await this.loadTemplate(import.meta.url);
 
-    this._specificFieldsDiv = this.container.querySelector('#specificFields')!;
-    this._colorInput = this.container.querySelector('#color')!;
-    this._addButton = this.container.querySelector('#add')!;
+    this._specificFieldsDiv = this.container.querySelector(this.idUniqueQuery('specificFields'))!;
+    this._colorInput = this.container.querySelector(this.idUniqueQuery('color'))!;
+    this._addButton = this.container.querySelector(this.idUniqueQuery('add'))!;
+    this.container.querySelector('label')!.htmlFor = this._colorInput.id;
   }
 
   public toggleSpecificFields(mode: string) {

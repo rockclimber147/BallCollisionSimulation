@@ -119,10 +119,10 @@ export class SimulationUI extends ComponentUIBase {
     this.container = await this.loadTemplate(import.meta.url);
     this.canvas = this.container.querySelector('canvas')!;
     this.context = this.canvas.getContext('2d')!;
-    this.startPauseButton = this.container.querySelector('#start')!;
-    this.clearBallsButton = this.container.querySelector('#clearBalls')!;
-    this.tickButton = this.container.querySelector('#tick')!;
-    this.updateTimeSpan = this.container.querySelector('#updateTime')!;
+    this.startPauseButton = this.container.querySelector(this.idUniqueQuery('start'))!;
+    this.clearBallsButton = this.container.querySelector(this.idUniqueQuery('clearBalls'))!;
+    this.tickButton = this.container.querySelector(this.idUniqueQuery('tick'))!;
+    this.updateTimeSpan = this.container.querySelector(this.idUniqueQuery('updateTime'))!;
   }
 
   draw(drawable: Drawable) {
@@ -310,6 +310,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     this.collisionHandlerComponent.tearDown();
     this.collisionHandlerComponent = this.registerChild(newHandler);
     this.updateCollisionHandlerBounds();
+    this.collisionHandlerComponent.updateTargetId(this.ui);
     await newHandler.setup();
   }
 }
