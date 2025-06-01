@@ -7,6 +7,7 @@ import { SimulationHandler } from '../Simulation/SimulationEnums.js';
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/SweepAndPruneComponent.js';
 import { UniformGridComponent } from '../CollisionHandlers/UniformGrid/UniformGridComponent.js';
+import { QuadTreeComponent } from '../CollisionHandlers/QuadTree/QuadTreeComponent.js';
 import { DropDownComponent } from '../TerminalComponents/Dropdown/DropDownComponent.js';
 
 class CollisionHandlerSelectUI extends ComponentUIBase {
@@ -53,6 +54,10 @@ class CollisionHandlerSelectModel extends ComponentModelBase {
     this.handlerMap.set(
       SimulationHandler.SWEEP_AND_PRUNE,
       new SweepAndPruneComponent(this.handlerComponentTarget)
+    );
+    this.handlerMap.set(
+      SimulationHandler.QUAD_TREE,
+      new QuadTreeComponent(this.handlerComponentTarget)
     );
     if (!this.isHandlerParent)
       this.handlerMap.set(
