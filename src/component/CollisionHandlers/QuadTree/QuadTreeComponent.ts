@@ -31,7 +31,7 @@ class QuadTreeModel extends CollisionHandlerModelBase {
 }
 
 class QuadTree {
-  static maxDepth: number = 10;
+  static maxDepth: number = 6;
   depth: number;
   bounds: SimulationBounds;
   capacity: number;
@@ -130,10 +130,14 @@ export class QuadTreeComponent extends CollisionHandlerComponentBase<QuadTreeMod
     this.capacitySlider = this.registerChild(
       new NumericSliderComponent('capacitySlider', 'Max Balls Per Cell: ', {
         value: this.model.maxCapacity,
+        max: 30,
       })
     );
     this.depthSlider = this.registerChild(
-      new NumericSliderComponent('depthSlider', 'Cell subdivisions: ', { value: QuadTree.maxDepth })
+      new NumericSliderComponent('depthSlider', 'Max cell subdivisions: ', {
+        value: QuadTree.maxDepth,
+        max: 12,
+      })
     );
   }
   setupChildActions(): void {

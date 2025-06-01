@@ -110,6 +110,7 @@ export class SimulationUI extends ComponentUIBase {
   clearBallsButton?: HTMLButtonElement;
   tickButton?: HTMLButtonElement;
   updateTimeSpan?: HTMLSpanElement;
+  totalBallsSpan?: HTMLSpanElement;
 
   constructor() {
     super();
@@ -123,6 +124,7 @@ export class SimulationUI extends ComponentUIBase {
     this.clearBallsButton = this.container.querySelector(this.idUniqueQuery('clearBalls'))!;
     this.tickButton = this.container.querySelector(this.idUniqueQuery('tick'))!;
     this.updateTimeSpan = this.container.querySelector(this.idUniqueQuery('updateTime'))!;
+    this.totalBallsSpan = this.container.querySelector(this.idUniqueQuery('totalBalls'))!;
   }
 
   draw(drawable: Drawable) {
@@ -153,6 +155,10 @@ export class SimulationUI extends ComponentUIBase {
       }, 300);
     }
     this.updateTimeSpan!.innerHTML = time.toFixed(2);
+  }
+
+  setTotalBallsSpan(count: number) {
+    this.totalBallsSpan!.innerHTML = `${count}`;
   }
 }
 
@@ -269,6 +275,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
   ballAdded = () => {
     this.model.addBalls(this.addBallsComponent.getBalls());
+    this.updateBallCount();
     this.drawBalls();
   };
 
@@ -285,11 +292,16 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
   clearBalls = () => {
     this.model.clearBalls();
+    this.updateBallCount();
     this.drawBalls();
   };
 
   updateTime = () => {
     this.ui.setUpdateTimeSpan(this.model.UpdateTime, this.model.FPS);
+  };
+
+  updateBallCount = () => {
+    this.ui.setTotalBallsSpan(this.model.BallCount);
   };
 
   updateModelPotentialCollisions = () => {

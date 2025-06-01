@@ -225,7 +225,7 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
     this.children.push(child);
     return child;
   }
-  
+
   deregisterChild(component: ComponentBase<ComponentModelBase, ComponentUIBase>) {
     this.children = this.children.filter((child) => child != component);
   }
@@ -248,7 +248,7 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
 
   tearDownChildren(): void {
     this.children.forEach((child) => {
-      child.removeObserver(this)
+      child.removeObserver(this);
       child.tearDown();
     });
   }
