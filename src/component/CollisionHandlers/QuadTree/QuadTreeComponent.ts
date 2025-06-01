@@ -8,6 +8,8 @@ import { ComponentUIBase } from '../../BaseComponent.js';
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
 import { PhysicsBall } from '../../../ball_physics/Ball.js';
 import { Drawable, Line } from '../../../display/Drawable.js';
+import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
+import { SimulationActionEnum } from '../../Simulation/SimulationComponent.js';
 
 class QuadTreeUI extends ComponentUIBase {
   async setup(): Promise<void> {
@@ -17,7 +19,6 @@ class QuadTreeUI extends ComponentUIBase {
 
 class QuadTreeModel extends CollisionHandlerModelBase {
   maxCapacity: number = 2;
-  maxDepth: number = 1;
   tree: QuadTree = new QuadTree(this.collisionBounds, this.maxCapacity, 0);
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     this.tree = new QuadTree(this.collisionBounds, this.maxCapacity, 0);
@@ -122,11 +123,28 @@ class QuadTree {
 }
 
 export class QuadTreeComponent extends CollisionHandlerComponentBase<QuadTreeModel, QuadTreeUI> {
+  capacitySlider: NumericSliderComponent;
+  depthSlider: NumericSliderComponent;
   constructor(targetID: string) {
     super(new QuadTreeModel(SimulationHandler.QUAD_TREE), new QuadTreeUI(), targetID);
+    this.capacitySlider = this.registerChild(
+      new NumericSliderComponent('capacitySlider', 'Max Balls Per Cell: ', {
+        value: this.model.maxCapacity,
+      })
+    );
+    this.depthSlider = this.registerChild(
+      new NumericSliderComponent('depthSlider', 'Cell subdivisions: ', { value: QuadTree.maxDepth })
+    );
   }
   setupChildActions(): void {
-    return;
+    this.addAction(this.capacitySlider.getID(), () => {
+      this.model.maxCapacity = this.capacitySlider.getValue();
+      this.notify(SimulationActionEnum.DRAW_BALLS);
+    });
+    this.addAction(this.depthSlider.getID(), () => {
+      QuadTree.maxDepth = this.depthSlider.getValue();
+      this.notify(SimulationActionEnum.DRAW_BALLS);
+    });
   }
   setupUIEvents(): void {
     return;
