@@ -204,7 +204,7 @@ abstract class ComponentBase<M extends ComponentModelBase, U extends ComponentUI
   tearDown(): void {
     this.model.removeObserver(this.ui);
     this.ui.tearDown();
-    this.uiContainer!.innerHTML = '';
+    this.uiContainer!.replaceChildren();
   }
 }
 
@@ -225,10 +225,9 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
     this.children.push(child);
     return child;
   }
-
-  protected deregisterChild(child: ComponentBase<ComponentModelBase, ComponentUIBase>) {
-    this.children.filter((currentChild) => currentChild != child);
-    child.removeObserver(this);
+  
+  deregisterChild(component: ComponentBase<ComponentModelBase, ComponentUIBase>) {
+    this.children = this.children.filter((child) => child != component);
   }
 
   /**
@@ -249,7 +248,6 @@ abstract class ParentComponentBase<M extends ComponentModelBase, U extends Compo
 
   tearDownChildren(): void {
     this.children.forEach((child) => {
-      this.deregisterChild(child);
       child.tearDown();
     });
   }

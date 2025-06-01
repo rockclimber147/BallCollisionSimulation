@@ -223,6 +223,7 @@ export class UniformGridComponent extends CollisionHandlerComponentBase<
   async updateCollisionHandler(
     newHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
   ) {
+    this.deregisterChild(this.subHandler);
     this.subHandler.tearDown();
     this.subHandler = this.registerChild(newHandler);
     this.model.subhandler = this.subHandler;
