@@ -1,4 +1,4 @@
-import { PhysicsBall } from '../../ball_physics/Ball.js';
+import { Ball, PhysicsBall } from '../../ball_physics/Ball.js';
 import { Drawable, Line } from '../../display/Drawable.js';
 import { ComponentModelBase, ComponentUIBase, ParentComponentBase } from '../BaseComponent.js';
 
@@ -65,6 +65,25 @@ export class SimulationBounds {
     this.y = y;
     this.width = width;
     this.height = height;
+  }
+
+  contains(ball: Ball): boolean {
+    return (
+      ball.x - ball.radius >= this.x &&
+      ball.x + ball.radius <= this.x + this.width &&
+      ball.y - ball.radius >= this.y &&
+      ball.y + ball.radius <= this.y + this.height
+    );
+  }
+
+  overlaps(ball: Ball) {
+    const closestX = Math.max(this.x, Math.min(ball.x, this.x + this.width));
+    const closestY = Math.max(this.y, Math.min(ball.y, this.y + this.height));
+
+    const dx = ball.x - closestX;
+    const dy = ball.y - closestY;
+
+    return dx * dx + dy * dy <= ball.radius * ball.radius;
   }
 }
 
