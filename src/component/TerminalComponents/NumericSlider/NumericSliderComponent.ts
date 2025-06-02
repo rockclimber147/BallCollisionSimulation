@@ -76,7 +76,7 @@ export class NumericSliderComponent extends ComponentBase<NumericSliderModel, Nu
   }
 }
 
-type NumericSliderOptions = {
+export type NumericSliderOptions = {
   value?: number;
   min?: number;
   max?: number;

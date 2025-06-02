@@ -1,5 +1,4 @@
 import { Drawable } from '../display/Drawable.js';
-import { IBehavior } from './Behavior.js';
 
 class Vector {
   x: number = 0;
@@ -140,33 +139,7 @@ export class MovingBall extends Ball {
   }
 }
 
-export class BehaviorBall extends MovingBall {
-  static behaviors: IBehavior[] = [];
-
-  static AddBehavior(behavior: IBehavior) {
-    BehaviorBall.behaviors.push(behavior);
-  }
-
-  static RemoveBehavior(behavior: IBehavior) {
-    const index = BehaviorBall.behaviors.indexOf(behavior);
-    if (index > -1) {
-      BehaviorBall.behaviors.splice(index, 1);
-    }
-  }
-
-  constructor(position: Vector, radius: number, color: string, velocity: Vector) {
-    super(position, radius, color, velocity);
-  }
-
-  update(deltaTime: number) {
-    BehaviorBall.behaviors.forEach((behavior) => {
-      behavior.applyBehavior(this, deltaTime);
-    });
-    super.update(deltaTime);
-  }
-}
-
-export class PhysicsBall extends BehaviorBall {
+export class PhysicsBall extends MovingBall {
   mass: number;
 
   constructor(position: Vector, radius: number, color: string, velocity: Vector, mass: number) {

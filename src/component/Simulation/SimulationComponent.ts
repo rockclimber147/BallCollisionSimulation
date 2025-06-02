@@ -13,6 +13,12 @@ import {
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 import { CSSHelper } from '../../display/CSSHelper.js';
 import { CollisionHandlerSelectComponent } from '../CollisionHandlerSelect/CollisionHandlerSelectComponent.js';
+import {
+  IBehavior,
+  SimpleBehaviorComponent,
+} from '../Behavior/SimpleBehaviorComponent/SimpleBehaviorComponent.js';
+import { DragBehaviorModel, GravityBehaviorModel } from '../Behavior/Behavior.js';
+
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
   private fps: number = 60;
@@ -22,6 +28,7 @@ export class SimulationModel extends ComponentModelBase {
   potentialCollisions: BallCollisionPair[] = [];
   drawPotentialCollisions: boolean = true;
   drawCollisionRepresentation: boolean = true;
+  behaviors: IBehavior[] = [];
 
   constructor() {
     super();
@@ -78,6 +85,7 @@ export class SimulationModel extends ComponentModelBase {
     this.potentialCollisions.forEach((pair) => pair.resolveCollision());
     this.balls.forEach((ball) => {
       ball.update(deltaTime);
+      this.behaviors.forEach((behavior) => behavior.applyBehavior(ball, deltaTime));
     });
   }
 
@@ -211,6 +219,17 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 
     this.collisionHandlerComponent = this.registerChild(
       new NaiveComponent(this.handlerComponentTarget)
+    );
+
+    this.model.behaviors.push(
+      this.registerChild(
+        new SimpleBehaviorComponent(new GravityBehaviorModel(), 'behavior', 'Gravity factor: ')
+      )
+    );
+    this.model.behaviors.push(
+      this.registerChild(
+        new SimpleBehaviorComponent(new DragBehaviorModel(), 'behavior', 'Drag Coefficient: ')
+      )
     );
 
     this.addAction(SimulationActionEnum.BALL_ADDED, this.ballAdded);
