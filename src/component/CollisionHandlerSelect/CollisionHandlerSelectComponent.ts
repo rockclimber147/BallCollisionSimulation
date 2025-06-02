@@ -55,9 +55,10 @@ class CollisionHandlerSelectModel extends ComponentModelBase {
       SimulationHandler.SWEEP_AND_PRUNE,
       new SweepAndPruneComponent(this.handlerComponentTarget)
     );
-    this.handlerMap.set(
-      SimulationHandler.QUAD_TREE,
-      new QuadTreeComponent(this.handlerComponentTarget)
+    if (!this.isHandlerParent)
+      this.handlerMap.set(
+        SimulationHandler.QUAD_TREE,
+        new QuadTreeComponent(this.handlerComponentTarget)
     );
     if (!this.isHandlerParent)
       this.handlerMap.set(
