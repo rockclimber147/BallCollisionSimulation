@@ -1,3 +1,76 @@
+/* Container for the whole simulation component */
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+/* Canvas styling */
 .canvas {
-  border: 1px solid black;
+  border: 2px solid #333;
+  background-color: #f4f4f4;
+}
+
+/* Controls wrapper */
+.controls {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  background-color: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Button section */
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Slider and label section */
+.sliders label,
+.behaviors label,
+.collision label,
+.view-controls label {
+  font-weight: bold;
+  margin-bottom: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.sliders span {
+  display: inline-block;
+  min-width: 120px;
+}
+
+/* Info rows */
+.info div {
+  margin-bottom: 0.1rem;
+}
+
+/* Behavior/collision/view control sections */
+.behaviors,
+.collision,
+.view-controls {
+  padding-top: 0.3rem;
+  border-top: 1px solid #ddd;
 }

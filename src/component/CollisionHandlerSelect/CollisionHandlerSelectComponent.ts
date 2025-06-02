@@ -59,7 +59,7 @@ class CollisionHandlerSelectModel extends ComponentModelBase {
       this.handlerMap.set(
         SimulationHandler.QUAD_TREE,
         new QuadTreeComponent(this.handlerComponentTarget)
-    );
+      );
     if (!this.isHandlerParent)
       this.handlerMap.set(
         SimulationHandler.UNIFORM_GRID,

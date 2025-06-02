@@ -189,7 +189,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     );
 
     this.fpsSliderComponent = this.registerChild(
-      new NumericSliderComponent('fpsSlider', 'FPS: ', {
+      new NumericSliderComponent('fpsSlider', 'Target FPS: ', {
         value: this.model.FPS,
       })
     );

@@ -131,7 +131,7 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
       (key) => BallModeEnum[key as keyof typeof BallModeEnum]
     );
     this.modeSelectDropdown = this.registerChild(
-      new DropDownComponent('dropdownComponent', 'Mode Select', ballModeValues)
+      new DropDownComponent('dropdownComponent', '', ballModeValues)
     );
 
     this.radiusSlider = this.registerChild(
@@ -143,7 +143,7 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
       new NumericSliderComponent('mass', 'Mass', { value: this.model.mass })
     );
     this.amountSlider = this.registerChild(
-      new NumericSliderComponent('amount', 'Choose Amount', {
+      new NumericSliderComponent('amount', '', {
         value: this.model.toAddCount,
       })
     );
