@@ -143,7 +143,7 @@ export class AddBallComponent extends ParentComponentBase<AddBallModel, AddBallU
       new NumericSliderComponent('mass', 'Mass', { value: this.model.mass })
     );
     this.amountSlider = this.registerChild(
-      new NumericSliderComponent('amount', '', {
+      new NumericSliderComponent('amount', ' ', {
         value: this.model.toAddCount,
       })
     );
