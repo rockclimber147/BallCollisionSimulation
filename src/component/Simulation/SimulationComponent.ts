@@ -8,7 +8,6 @@ import {
   CollisionHandlerModelBase,
   CollisionHandlerComponentBase,
   BallCollisionPair,
-  SimulationBounds,
 } from '../CollisionHandlers/CollisionHandler.js';
 import { NaiveComponent } from '../CollisionHandlers/Naive/NaiveComponent.js';
 import { CSSHelper } from '../../display/CSSHelper.js';
@@ -18,6 +17,7 @@ import {
   SimpleBehaviorComponent,
 } from '../Behavior/SimpleBehaviorComponent/SimpleBehaviorComponent.js';
 import { DragBehaviorModel, GravityBehaviorModel } from '../Behavior/Behavior.js';
+import { CanvasComponent } from './CanvasComponent/CanvasComponent.js';
 
 export class SimulationModel extends ComponentModelBase {
   private balls: PhysicsBall[] = [];
@@ -112,8 +112,6 @@ export class SimulationModel extends ComponentModelBase {
 
 export class SimulationUI extends ComponentUIBase {
   timeSpanIsRed: boolean = false;
-  canvas?: HTMLCanvasElement;
-  context?: CanvasRenderingContext2D;
   startPauseButton?: HTMLButtonElement;
   clearBallsButton?: HTMLButtonElement;
   tickButton?: HTMLButtonElement;
@@ -126,24 +124,11 @@ export class SimulationUI extends ComponentUIBase {
 
   async setup() {
     this.container = await this.loadTemplate(import.meta.url);
-    this.canvas = this.container.querySelector('canvas')!;
-    this.context = this.canvas.getContext('2d')!;
     this.startPauseButton = this.container.querySelector(this.idUniqueQuery('start'))!;
     this.clearBallsButton = this.container.querySelector(this.idUniqueQuery('clearBalls'))!;
     this.tickButton = this.container.querySelector(this.idUniqueQuery('tick'))!;
     this.updateTimeSpan = this.container.querySelector(this.idUniqueQuery('updateTime'))!;
     this.totalBallsSpan = this.container.querySelector(this.idUniqueQuery('totalBalls'))!;
-  }
-
-  draw(drawable: Drawable) {
-    drawable.draw(this.context!);
-  }
-
-  drawAll(drawables: Drawable[], clear: boolean = true) {
-    if (clear) this.context!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
-    for (const drawable of drawables) {
-      drawable.draw(this.context!);
-    }
   }
 
   toggleStartPause() {
@@ -172,6 +157,7 @@ export class SimulationUI extends ComponentUIBase {
 
 export class SimulationComponent extends ParentComponentBase<SimulationModel, SimulationUI> {
   handlerComponentTarget: string = 'collisionHandler';
+  canvasComponent: CanvasComponent;
   addBallsComponent: AddBallComponent;
   fpsSliderComponent: NumericSliderComponent;
   physicsSubStepSliderComponent: NumericSliderComponent;
@@ -184,6 +170,11 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   >;
   constructor(model: SimulationModel, ui: SimulationUI, targetId: string) {
     super(model, ui, targetId);
+
+    this.canvasComponent = this.registerChild(
+      new CanvasComponent('canvasComponent', 'canvasComponent')
+    );
+
     this.addBallsComponent = this.registerChild(
       new AddBallComponent(new AddBallModel(), new AddBallUI(), 'AddBallComponent')
     );
@@ -242,6 +233,8 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
       SimulationActionEnum.UPDATE_MODEL_COLLISIONS,
       this.updateModelPotentialCollisions
     );
+
+    this.addAction(SimulationActionEnum.CANVAS_RESIZED, this.updateCollisionHandlerBounds);
   }
 
   setupUIEvents(): void {
@@ -299,14 +292,15 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
   };
 
   drawBalls = () => {
-    this.ui.drawAll([], true);
+    this.canvasComponent.drawAll([], true);
     if (this.model.drawCollisionRepresentation)
-      this.ui.drawAll(
+      this.canvasComponent.drawAll(
         this.collisionHandlerComponent.getCollisionRepresentation(this.model.getBalls()),
         false
       );
-    this.ui.drawAll(this.model.getBallsAsDrawable(), false);
-    if (this.model.drawPotentialCollisions) this.ui.drawAll(this.model.potentialCollisions, false);
+    this.canvasComponent.drawAll(this.model.getBallsAsDrawable(), false);
+    if (this.model.drawPotentialCollisions)
+      this.canvasComponent.drawAll(this.model.potentialCollisions, false);
   };
 
   clearBalls = () => {
@@ -329,11 +323,9 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     );
   };
 
-  updateCollisionHandlerBounds() {
-    this.collisionHandlerComponent.setCollisionBounds(
-      new SimulationBounds(0, 0, this.ui.canvas!.width, this.ui.canvas!.height)
-    );
-  }
+  updateCollisionHandlerBounds = () => {
+    this.collisionHandlerComponent.setCollisionBounds(this.canvasComponent.getBounds());
+  };
 
   async updateCollisionHandler(
     newHandler: CollisionHandlerComponentBase<CollisionHandlerModelBase, ComponentUIBase>
@@ -353,6 +345,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
 }
 
 export enum SimulationActionEnum {
+  CANVAS_RESIZED = 'canvasResized',
   BALL_ADDED = 'ballAdded',
   DRAW_BALLS = 'drawBalls',
   UPDATE_TIME = 'updateTime',

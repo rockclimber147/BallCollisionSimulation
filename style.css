@@ -74,3 +74,12 @@ button:hover {
   padding-top: 0.3rem;
   border-top: 1px solid #ddd;
 }
+
+.canvas-resizable-wrapper {
+  position: relative;
+  resize: both;
+  width: 800px;
+  height: 600px;
+  border: 2px solid #333;
+  background-color: #f4f4f4;
+}
