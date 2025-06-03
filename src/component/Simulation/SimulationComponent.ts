@@ -117,6 +117,7 @@ export class SimulationUI extends ComponentUIBase {
   tickButton?: HTMLButtonElement;
   updateTimeSpan?: HTMLSpanElement;
   totalBallsSpan?: HTMLSpanElement;
+  totalCollisionsSpan?: HTMLSpanElement;
 
   constructor() {
     super();
@@ -129,6 +130,7 @@ export class SimulationUI extends ComponentUIBase {
     this.tickButton = this.container.querySelector(this.idUniqueQuery('tick'))!;
     this.updateTimeSpan = this.container.querySelector(this.idUniqueQuery('updateTime'))!;
     this.totalBallsSpan = this.container.querySelector(this.idUniqueQuery('totalBalls'))!;
+    this.totalCollisionsSpan = this.container.querySelector(this.idUniqueQuery('totalCollisions'))!;
   }
 
   toggleStartPause() {
@@ -152,6 +154,10 @@ export class SimulationUI extends ComponentUIBase {
 
   setTotalBallsSpan(count: number) {
     this.totalBallsSpan!.innerHTML = `${count}`;
+  }
+
+  setTotalCollisonsSpan(count: number) {
+    this.totalCollisionsSpan!.innerHTML = `${count}`;
   }
 }
 
@@ -321,6 +327,7 @@ export class SimulationComponent extends ParentComponentBase<SimulationModel, Si
     this.model.potentialCollisions = this.collisionHandlerComponent.getAllPotentialCollisions(
       this.model.getBalls()
     );
+    this.ui.setTotalCollisonsSpan(this.model.potentialCollisions.length);
   };
 
   updateCollisionHandlerBounds = () => {
