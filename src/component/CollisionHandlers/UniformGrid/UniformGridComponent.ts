@@ -40,7 +40,9 @@ class UniformGridModel extends CollisionHandlerModelBase {
     this.grid.getCells().forEach((cell) => {
       const balls = cell.balls;
       this.subhandler?.setCollisionBounds(cell.bounds);
-      collisions.push(...this.subhandler!.getAllPotentialCollisions(balls));
+      for (const pair of this.subhandler!.getAllPotentialCollisions(balls)) {
+        collisions.push(pair);
+      }
     });
     return collisions;
   }
