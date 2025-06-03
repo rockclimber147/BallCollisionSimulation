@@ -25,8 +25,8 @@ class NaiveModel extends CollisionHandlerModelBase {
     }
     return pairs;
   }
-  getCollisionRepresentation(balls: PhysicsBall[] = []): Drawable[] {
-    return balls;
+  getCollisionRepresentation(): Drawable[] {
+    return [];
   }
 }
 
