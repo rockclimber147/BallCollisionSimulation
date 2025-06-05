@@ -3,4 +3,5 @@ export enum SimulationHandler {
   SWEEP_AND_PRUNE = 'Sweep and prune',
   UNIFORM_GRID = 'Uniform Grid',
   QUAD_TREE = 'Quad Tree',
+  ALTERNATING_AXIS = 'Alternating Axis',
 }

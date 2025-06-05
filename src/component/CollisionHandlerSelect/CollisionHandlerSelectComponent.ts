@@ -9,6 +9,7 @@ import { SweepAndPruneComponent } from '../CollisionHandlers/SweepAndPrune/Sweep
 import { UniformGridComponent } from '../CollisionHandlers/UniformGrid/UniformGridComponent.js';
 import { QuadTreeComponent } from '../CollisionHandlers/QuadTree/QuadTreeComponent.js';
 import { DropDownComponent } from '../TerminalComponents/Dropdown/DropDownComponent.js';
+import { AlternatingAxisPartitionComponent } from '../CollisionHandlers/AlternatingAxisPartition/AlternatingAxisPartitionComponent.js';
 
 class CollisionHandlerSelectUI extends ComponentUIBase {
   model: CollisionHandlerSelectModel;
@@ -64,6 +65,11 @@ class CollisionHandlerSelectModel extends ComponentModelBase {
       this.handlerMap.set(
         SimulationHandler.UNIFORM_GRID,
         new UniformGridComponent(this.handlerComponentTarget)
+      );
+    if (!this.isHandlerParent)
+      this.handlerMap.set(
+        SimulationHandler.ALTERNATING_AXIS,
+        new AlternatingAxisPartitionComponent(this.handlerComponentTarget)
       );
   }
 }
