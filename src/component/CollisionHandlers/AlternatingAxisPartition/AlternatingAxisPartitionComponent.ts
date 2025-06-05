@@ -9,6 +9,7 @@ import {
 } from '../CollisionHandler.js';
 
 import { SimulationHandler } from '../../Simulation/SimulationEnums.js';
+import { NumericSliderComponent } from '../../TerminalComponents/NumericSlider/NumericSliderComponent.js';
 
 class AlternatingAxisPartitionUI extends ComponentUIBase {
   async setup(): Promise<void> {
@@ -22,6 +23,20 @@ class AlternatingAxisPartitionModel extends CollisionHandlerModelBase {
   private maxDepth: number = 10;
   private threshold: number = 10;
   private startVertical: boolean = true;
+
+  set MaxDepth(val: number) {
+    this.maxDepth = val;
+  }
+  get MaxDepth() {
+    return this.maxDepth;
+  }
+
+  set Threshold(val: number) {
+    this.threshold = val;
+  }
+  get Threshold() {
+    return this.threshold;
+  }
 
   getAllPotentialCollisions(balls: PhysicsBall[]): BallCollisionPair[] {
     this.collisionPairs = [];
@@ -96,33 +111,42 @@ class AlternatingAxisPartitionModel extends CollisionHandlerModelBase {
       new SimulationBounds(bounds.x, mid, bounds.width, bottomHeight),
     ];
   }
-
-  setMaxDepth(newDepth: number) {
-    this.maxDepth = newDepth;
-  }
-
-  setThreshold(newThreshold: number) {
-    this.threshold = newThreshold;
-  }
-
-  setStartVertical(val: boolean) {
-    this.startVertical = val;
-  }
 }
 
 export class AlternatingAxisPartitionComponent extends CollisionHandlerComponentBase<
   AlternatingAxisPartitionModel,
   AlternatingAxisPartitionUI
 > {
-  setupChildActions(): void {
-    return;
-  }
+  splitThreshold: NumericSliderComponent;
+  splitLimit: NumericSliderComponent;
   constructor(targetID: string) {
     super(
       new AlternatingAxisPartitionModel(SimulationHandler.NAIVE),
       new AlternatingAxisPartitionUI(),
       targetID
     );
+    this.splitThreshold = this.registerChild(
+      new NumericSliderComponent('splitThreshold', 'Balls needed to split: ', {
+        value: this.model.Threshold,
+        min: 1,
+        max: 50,
+      })
+    );
+    this.splitLimit = this.registerChild(
+      new NumericSliderComponent('splitLimit', 'Max subdivisions: ', {
+        value: this.model.MaxDepth,
+        min: 1,
+        max: 20,
+      })
+    );
+  }
+  setupChildActions(): void {
+    this.addAction(this.splitThreshold.getID(), () => {
+      this.model.Threshold = this.splitThreshold.getValue();
+    });
+    this.addAction(this.splitLimit.getID(), () => {
+      this.model.MaxDepth = this.splitLimit.getValue();
+    });
   }
   setupUIEvents(): void {
     return;
