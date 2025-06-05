@@ -69,6 +69,7 @@ class AlternatingAxisPartitionModel extends CollisionHandlerModelBase {
       if (min <= mid) leftOrTop.push(ball);
       if (max >= mid) rightOrBottom.push(ball);
     }
+    this.generateDividingLines(mid, bounds, isVertical, depth)
     const updatedBounds: SimulationBounds[] = this.partitionBounds(mid, bounds, isVertical);
     this.subDivide(leftOrTop, depth + 1, !isVertical, updatedBounds[0]);
     this.subDivide(rightOrBottom, depth + 1, !isVertical, updatedBounds[1]);
@@ -84,11 +85,18 @@ class AlternatingAxisPartitionModel extends CollisionHandlerModelBase {
 
   partitionBounds(mid: number, bounds: SimulationBounds, isVertical: boolean): SimulationBounds[] {
     if (isVertical) {
-      this.dividingLines.push(new Line(mid, bounds.y, mid, bounds.y + bounds.height));
       return this.splitBoundsLeftRight(mid, bounds);
     } else {
-      this.dividingLines.push(new Line(bounds.x, mid, bounds.x + bounds.width, mid));
       return this.splitBoundsTopBottom(mid, bounds);
+    }
+  }
+
+  generateDividingLines(mid: number, bounds: SimulationBounds, isVertical: boolean, currentDepth: number): void {
+    const lineWidth = 5 * (1 - currentDepth / this.maxDepth);
+    if (isVertical) {
+      this.dividingLines.push(new Line(mid, bounds.y, mid, bounds.y + bounds.height, "black", 1, lineWidth));
+    } else {
+      this.dividingLines.push(new Line(bounds.x, mid, bounds.x + bounds.width, mid, "black", 1, lineWidth));
     }
   }
 

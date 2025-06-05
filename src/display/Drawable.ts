@@ -9,6 +9,7 @@ export class Line implements Drawable {
   y2: number;
   color: string;
   alpha: number;
+  width: number;
 
   constructor(
     x1: number,
@@ -16,7 +17,8 @@ export class Line implements Drawable {
     x2: number,
     y2: number,
     color: string = 'black',
-    alpha: number = 1
+    alpha: number = 1,
+    width: number = 1,
   ) {
     this.x1 = x1;
     this.y1 = y1;
@@ -24,10 +26,12 @@ export class Line implements Drawable {
     this.y2 = y2;
     this.color = color;
     this.alpha = alpha;
+    this.width = width;
   }
 
   draw(context: CanvasRenderingContext2D) {
     context.globalAlpha = this.alpha;
+    context.lineWidth = this.width;
     context.beginPath();
     context.moveTo(this.x1, this.y1);
     context.lineTo(this.x2, this.y2);
